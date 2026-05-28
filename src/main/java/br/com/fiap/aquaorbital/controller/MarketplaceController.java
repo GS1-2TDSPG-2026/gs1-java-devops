@@ -1,7 +1,7 @@
 package br.com.fiap.aquaorbital.controller;
 
-import br.com.fiap.aquaorbital.dto.request.MarketplaceDTOs.*;
-import br.com.fiap.aquaorbital.dto.response.ResponseDTOs.*;
+import br.com.fiap.aquaorbital.dto.MarketplaceDTOs.*;
+import br.com.fiap.aquaorbital.dto.ResponseDTOs.*;
 import br.com.fiap.aquaorbital.service.MarketplaceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

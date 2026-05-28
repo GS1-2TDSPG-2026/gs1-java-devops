@@ -1,8 +1,8 @@
 package br.com.fiap.aquaorbital.controller;
 
-import br.com.fiap.aquaorbital.dto.request.TanqueDTOs.AtualizarTanqueRequest;
-import br.com.fiap.aquaorbital.dto.request.TanqueDTOs.CriarTanqueRequest;
-import br.com.fiap.aquaorbital.dto.response.ResponseDTOs.TanqueResponse;
+import br.com.fiap.aquaorbital.dto.TanqueDTOs.AtualizarTanqueRequest;
+import br.com.fiap.aquaorbital.dto.TanqueDTOs.CriarTanqueRequest;
+import br.com.fiap.aquaorbital.dto.ResponseDTOs.TanqueResponse;
 import br.com.fiap.aquaorbital.service.TanqueService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
