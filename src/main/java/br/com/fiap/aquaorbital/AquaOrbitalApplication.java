@@ -4,10 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AquaorbitalApplication {
-
+public class AquaOrbitalApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(AquaorbitalApplication.class, args);
+		SpringApplication.run(AquaOrbitalApplication.class, args);
 	}
-
 }
