@@ -1,4 +1,47 @@
 package br.com.fiap.aquaorbital.entity;
 
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "TB_TRANSACAO_MARKETPLACE")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TransacaoMarketplace {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transacao")
+    @SequenceGenerator(name = "seq_transacao", sequenceName = "SEQ_TRANSACAO", allocationSize = 1)
+    @Column(name = "id_transacao")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario_comprador", nullable = false)
+    private Usuario usuarioComprador;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_lote")
+    private LoteBiomassa lote;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_credito")
+    private CreditoCarbono credito;
+
+    @Column(name = "tipo_transacao", nullable = false, length = 30)
+    private String tipoTransacao;
+
+    @Column(name = "quantidade", nullable = false, precision = 12, scale = 3)
+    private BigDecimal quantidade;
+
+    @Column(name = "valor_total", nullable = false, precision = 14, scale = 2)
+    private BigDecimal valorTotal;
+
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "PENDENTE";
+
+    @Column(name = "dt_transacao", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime dtTransacao = LocalDateTime.now();
 }
