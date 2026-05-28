@@ -1,9 +1,9 @@
 package br.com.fiap.aquaorbital.controller;
 
-import br.com.fiap.aquaorbital.dto.request.FazendaDTOs.AtualizarFazendaRequest;
-import br.com.fiap.aquaorbital.dto.request.FazendaDTOs.CriarFazendaRequest;
-import br.com.fiap.aquaorbital.dto.response.ResponseDTOs.DashboardFazendaResponse;
-import br.com.fiap.aquaorbital.dto.response.ResponseDTOs.FazendaResponse;
+import br.com.fiap.aquaorbital.dto.FazendaDTOs.AtualizarFazendaRequest;
+import br.com.fiap.aquaorbital.dto.FazendaDTOs.CriarFazendaRequest;
+import br.com.fiap.aquaorbital.dto.ResponseDTOs.DashboardFazendaResponse;
+import br.com.fiap.aquaorbital.dto.ResponseDTOs.FazendaResponse;
 import br.com.fiap.aquaorbital.service.FazendaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
