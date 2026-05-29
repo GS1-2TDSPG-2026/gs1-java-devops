@@ -20,6 +20,20 @@ public class ResponseDTOs {
                                  BigDecimal phMax, BigDecimal temperaturaMin, BigDecimal temperaturaMax,
                                  String status, LocalDate dtInstalacao) {}
 
+    public record DadoOrbitalResponse(
+            Long id,
+            Long idFazenda,
+            String nomeFazenda,
+            String fonte,
+            LocalDate dtColeta,
+            BigDecimal irradianciaParValue,
+            BigDecimal nebulosidade,
+            BigDecimal temperaturaAmbiente,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            LocalDateTime dtRegistro
+    ) {}
+
     public record LoteBiomassaResponse(Long id, Long idFazenda, String nomeFazenda, Long idTanque,
                                        String codigoTanque, String taxonomiaAlga, BigDecimal pesoKg,
                                        BigDecimal precoUnitario, String status, LocalDateTime dtColheita) {}
@@ -34,5 +48,6 @@ public class ResponseDTOs {
 
     public record DashboardFazendaResponse(Long idFazenda, String nomeFazenda, int totalTanques,
                                            int tanquesAtivos, int lotesDisponiveis,
-                                           int creditosDisponiveis, BigDecimal totalCo2Toneladas) {}
+                                           int creditosDisponiveis, BigDecimal totalCo2Toneladas,
+                                           DadoOrbitalResponse ultimoDadoOrbital) {}
 }

@@ -25,15 +25,25 @@ public class TanqueService {
 
     @Transactional
     public TanqueResponse criar(CriarTanqueRequest request) {
-        if (tanqueRepository.existsByCodigoTanque(request.codigoTanque()))
+        if (tanqueRepository.existsByCodigoTanque(request.codigoTanque())) {
             throw new IllegalArgumentException("Código de tanque já existe: " + request.codigoTanque());
+        }
+
         Fazenda fazenda = fazendaRepository.findById(request.idFazenda())
                 .orElseThrow(() -> new EntityNotFoundException("Fazenda não encontrada: " + request.idFazenda()));
-        Tanque tanque = Tanque.builder().fazenda(fazenda).codigoTanque(request.codigoTanque())
-                .tipoAlga(request.tipoAlga()).capacidadeLitros(request.capacidadeLitros())
-                .phMin(request.phMin()).phMax(request.phMax())
-                .temperaturaMin(request.temperaturaMin()).temperaturaMax(request.temperaturaMax())
-                .dtInstalacao(request.dtInstalacao()).build();
+
+        Tanque tanque = Tanque.builder()
+                .fazenda(fazenda)
+                .codigoTanque(request.codigoTanque())
+                .tipoAlga(request.tipoAlga())
+                .capacidadeLitros(request.capacidadeLitros())
+                .phMin(request.phMin())
+                .phMax(request.phMax())
+                .temperaturaMin(request.temperaturaMin())
+                .temperaturaMax(request.temperaturaMax())
+                .dtInstalacao(request.dtInstalacao())
+                .build();
+
         return toResponse(tanqueRepository.save(tanque));
     }
 
@@ -42,7 +52,8 @@ public class TanqueService {
     }
 
     public List<TanqueResponse> listarPorFazenda(Long fazendaId) {
-        return tanqueRepository.findByFazendaId(fazendaId).stream().map(this::toResponse).toList();
+        return tanqueRepository.findByFazendaId(fazendaId)
+                .stream().map(this::toResponse).toList();
     }
 
     public TanqueResponse buscarPorId(Long id) {
@@ -52,6 +63,7 @@ public class TanqueService {
     @Transactional
     public TanqueResponse atualizar(Long id, AtualizarTanqueRequest request) {
         Tanque tanque = buscarEntidade(id);
+
         if (request.tipoAlga() != null) tanque.setTipoAlga(request.tipoAlga());
         if (request.capacidadeLitros() != null) tanque.setCapacidadeLitros(request.capacidadeLitros());
         if (request.phMin() != null) tanque.setPhMin(request.phMin());
@@ -59,23 +71,29 @@ public class TanqueService {
         if (request.temperaturaMin() != null) tanque.setTemperaturaMin(request.temperaturaMin());
         if (request.temperaturaMax() != null) tanque.setTemperaturaMax(request.temperaturaMax());
         if (request.status() != null) tanque.setStatus(request.status());
+
         return toResponse(tanqueRepository.save(tanque));
     }
 
     @Transactional
     public void deletar(Long id) {
-        if (!tanqueRepository.existsById(id)) throw new EntityNotFoundException("Tanque não encontrado: " + id);
+        if (!tanqueRepository.existsById(id)) {
+            throw new EntityNotFoundException("Tanque não encontrado: " + id);
+        }
         tanqueRepository.deleteById(id);
     }
 
     private Tanque buscarEntidade(Long id) {
-        return tanqueRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tanque não encontrado: " + id));
+        return tanqueRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tanque não encontrado: " + id));
     }
 
     public TanqueResponse toResponse(Tanque t) {
-        return new TanqueResponse(t.getId(), t.getFazenda().getId(), t.getFazenda().getNome(),
+        return new TanqueResponse(
+                t.getId(), t.getFazenda().getId(), t.getFazenda().getNome(),
                 t.getCodigoTanque(), t.getTipoAlga(), t.getCapacidadeLitros(),
-                t.getPhMin(), t.getPhMax(), t.getTemperaturaMin(), t.getTemperaturaMax(),
-                t.getStatus(), t.getDtInstalacao());
+                t.getPhMin(), t.getPhMax(), t.getTemperaturaMin(),
+                t.getTemperaturaMax(), t.getStatus(), t.getDtInstalacao()
+        );
     }
 }

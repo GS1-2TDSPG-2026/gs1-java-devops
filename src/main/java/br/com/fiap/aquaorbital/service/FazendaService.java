@@ -26,6 +26,7 @@ public class FazendaService {
     private final TanqueRepository tanqueRepository;
     private final CreditoCarbonoRepository creditoCarbonoRepository;
     private final LoteBiomassaRepository loteBiomassaRepository;
+    private final DadoOrbitalRepository dadoOrbitalRepository;
 
     @Transactional
     public FazendaResponse criar(CriarFazendaRequest request, Long usuarioId) {
@@ -77,8 +78,18 @@ public class FazendaService {
         List<CreditoCarbono> creditos = creditoCarbonoRepository.findByFazendaId(idFazenda);
         int creditosDisponiveis = (int) creditos.stream().filter(c -> "DISPONIVEL".equals(c.getStatus())).count();
         BigDecimal totalCo2 = creditos.stream().map(CreditoCarbono::getCo2Toneladas).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        DadoOrbitalResponse ultimoDadoOrbital = dadoOrbitalRepository
+                .findTopByFazendaIdOrderByDtColetaDesc(idFazenda)
+                .map(d -> new DadoOrbitalResponse(
+                        d.getId(), d.getFazenda().getId(), d.getFazenda().getNome(),
+                        d.getFonte(), d.getDtColeta(), d.getIrradianciaParValue(),
+                        d.getNebulosidade(), d.getTemperaturaAmbiente(),
+                        d.getLatitude(), d.getLongitude(), d.getDtRegistro()))
+                .orElse(null);
+
         return new DashboardFazendaResponse(idFazenda, fazenda.getNome(), totalTanques, tanquesAtivos,
-                lotesDisponiveis, creditosDisponiveis, totalCo2);
+                lotesDisponiveis, creditosDisponiveis, totalCo2, ultimoDadoOrbital);
     }
 
     private Fazenda buscarEntidade(Long id) {

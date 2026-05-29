@@ -38,7 +38,8 @@ public class TanqueController {
 
     @GetMapping
     @Operation(summary = "Listar todos os tanques (paginado)")
-    public ResponseEntity<Page<TanqueResponse>> listar(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<TanqueResponse>> listar(
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(tanqueService.listarTodos(pageable));
     }
 
@@ -56,8 +57,9 @@ public class TanqueController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar tanque")
-    public ResponseEntity<EntityModel<TanqueResponse>> atualizar(@PathVariable Long id,
-                                                                 @Valid @RequestBody AtualizarTanqueRequest request) {
+    public ResponseEntity<EntityModel<TanqueResponse>> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody AtualizarTanqueRequest request) {
         return ResponseEntity.ok(toModel(tanqueService.atualizar(id, request)));
     }
 
@@ -68,10 +70,11 @@ public class TanqueController {
         return ResponseEntity.noContent().build();
     }
 
-    private EntityModel<TanqueResponse> toModel(TanqueResponse r) {
-        return EntityModel.of(r,
-                linkTo(methodOn(TanqueController.class).buscar(r.id())).withSelfRel(),
-                linkTo(methodOn(TanqueController.class).listarPorFazenda(r.idFazenda())).withRel("tanques-fazenda"),
-                linkTo(methodOn(FazendaController.class).buscar(r.idFazenda())).withRel("fazenda"));
+    private EntityModel<TanqueResponse> toModel(TanqueResponse response) {
+        return EntityModel.of(response,
+                linkTo(methodOn(TanqueController.class).buscar(response.id())).withSelfRel(),
+                linkTo(methodOn(TanqueController.class).listarPorFazenda(response.idFazenda())).withRel("tanques-fazenda"),
+                linkTo(methodOn(FazendaController.class).buscar(response.idFazenda())).withRel("fazenda")
+        );
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,13 +37,18 @@ public class FazendaController {
     public ResponseEntity<EntityModel<FazendaResponse>> criar(
             @Valid @RequestBody CriarFazendaRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
+
+        // Busca o ID do usuário logado via email
         Long usuarioId = ((br.com.fiap.aquaorbital.entity.Usuario) userDetails).getId();
-        return ResponseEntity.status(HttpStatus.CREATED).body(toModel(fazendaService.criar(request, usuarioId)));
+        FazendaResponse response = fazendaService.criar(request, usuarioId);
+        EntityModel<FazendaResponse> model = toModel(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
     @GetMapping
     @Operation(summary = "Listar todas as fazendas (paginado)")
-    public ResponseEntity<Page<FazendaResponse>> listar(@PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+    public ResponseEntity<Page<FazendaResponse>> listar(
+            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
         return ResponseEntity.ok(fazendaService.listarTodas(pageable));
     }
 
@@ -53,15 +59,16 @@ public class FazendaController {
     }
 
     @GetMapping("/{id}/dashboard")
-    @Operation(summary = "Dashboard da fazenda")
+    @Operation(summary = "Dashboard da fazenda — status, tanques, previsões e créditos")
     public ResponseEntity<DashboardFazendaResponse> dashboard(@PathVariable Long id) {
         return ResponseEntity.ok(fazendaService.getDashboard(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar fazenda")
-    public ResponseEntity<EntityModel<FazendaResponse>> atualizar(@PathVariable Long id,
-                                                                  @Valid @RequestBody AtualizarFazendaRequest request) {
+    public ResponseEntity<EntityModel<FazendaResponse>> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody AtualizarFazendaRequest request) {
         return ResponseEntity.ok(toModel(fazendaService.atualizar(id, request)));
     }
 
@@ -72,11 +79,12 @@ public class FazendaController {
         return ResponseEntity.noContent().build();
     }
 
-    private EntityModel<FazendaResponse> toModel(FazendaResponse r) {
-        return EntityModel.of(r,
-                linkTo(methodOn(FazendaController.class).buscar(r.id())).withSelfRel(),
-                linkTo(methodOn(FazendaController.class).dashboard(r.id())).withRel("dashboard"),
-                linkTo(methodOn(TanqueController.class).listarPorFazenda(r.id())).withRel("tanques"),
-                linkTo(methodOn(FazendaController.class).listar(Pageable.unpaged())).withRel("fazendas"));
+    private EntityModel<FazendaResponse> toModel(FazendaResponse response) {
+        return EntityModel.of(response,
+                linkTo(methodOn(FazendaController.class).buscar(response.id())).withSelfRel(),
+                linkTo(methodOn(FazendaController.class).dashboard(response.id())).withRel("dashboard"),
+                linkTo(methodOn(TanqueController.class).listarPorFazenda(response.id())).withRel("tanques"),
+                linkTo(methodOn(FazendaController.class).listar(Pageable.unpaged())).withRel("fazendas")
+        );
     }
 }
