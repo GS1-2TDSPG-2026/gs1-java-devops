@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/marketplace")
@@ -28,6 +31,8 @@ public class MarketplaceController {
 
     private final MarketplaceService marketplaceService;
 
+    // ── LOTES ──────────────────────────────────────────────────────────────
+
     @PostMapping("/lotes")
     @Operation(summary = "Publicar novo lote de biomassa")
     public ResponseEntity<LoteBiomassaResponse> criarLote(@Valid @RequestBody CriarLoteRequest request) {
@@ -36,7 +41,8 @@ public class MarketplaceController {
 
     @GetMapping("/lotes")
     @Operation(summary = "Listar todos os lotes (paginado)")
-    public ResponseEntity<Page<LoteBiomassaResponse>> listarLotes(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<LoteBiomassaResponse>> listarLotes(
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(marketplaceService.listarLotes(pageable));
     }
 
@@ -54,8 +60,9 @@ public class MarketplaceController {
 
     @PatchMapping("/lotes/{id}/status")
     @Operation(summary = "Atualizar status do lote")
-    public ResponseEntity<LoteBiomassaResponse> atualizarStatusLote(@PathVariable Long id,
-                                                                    @Valid @RequestBody AtualizarStatusLoteRequest request) {
+    public ResponseEntity<LoteBiomassaResponse> atualizarStatusLote(
+            @PathVariable Long id,
+            @Valid @RequestBody AtualizarStatusLoteRequest request) {
         return ResponseEntity.ok(marketplaceService.atualizarStatusLote(id, request));
     }
 
@@ -66,9 +73,12 @@ public class MarketplaceController {
         return ResponseEntity.noContent().build();
     }
 
+    // ── CRÉDITOS DE CARBONO ────────────────────────────────────────────────
+
     @GetMapping("/creditos")
     @Operation(summary = "Listar todos os créditos de carbono (paginado)")
-    public ResponseEntity<Page<CreditoCarbonoResponse>> listarCreditos(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<CreditoCarbonoResponse>> listarCreditos(
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(marketplaceService.listarCreditos(pageable));
     }
 
@@ -90,23 +100,29 @@ public class MarketplaceController {
         return ResponseEntity.ok(marketplaceService.validarCredito(id));
     }
 
+    // ── TRANSAÇÕES ─────────────────────────────────────────────────────────
+
     @PostMapping("/transacoes")
     @Operation(summary = "Realizar transação de compra")
-    public ResponseEntity<TransacaoResponse> criarTransacao(@Valid @RequestBody CriarTransacaoRequest request,
-                                                            @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<TransacaoResponse> criarTransacao(
+            @Valid @RequestBody CriarTransacaoRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
         Long usuarioId = ((br.com.fiap.aquaorbital.entity.Usuario) userDetails).getId();
-        return ResponseEntity.status(HttpStatus.CREATED).body(marketplaceService.criarTransacao(request, usuarioId));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(marketplaceService.criarTransacao(request, usuarioId));
     }
 
     @GetMapping("/transacoes")
     @Operation(summary = "Listar todas as transações (paginado)")
-    public ResponseEntity<Page<TransacaoResponse>> listarTransacoes(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<TransacaoResponse>> listarTransacoes(
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(marketplaceService.listarTransacoes(pageable));
     }
 
     @GetMapping("/transacoes/minhas")
     @Operation(summary = "Listar minhas transações")
-    public ResponseEntity<List<TransacaoResponse>> minhasTransacoes(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<TransacaoResponse>> minhasTransacoes(
+            @AuthenticationPrincipal UserDetails userDetails) {
         Long usuarioId = ((br.com.fiap.aquaorbital.entity.Usuario) userDetails).getId();
         return ResponseEntity.ok(marketplaceService.listarTransacoesPorUsuario(usuarioId));
     }
