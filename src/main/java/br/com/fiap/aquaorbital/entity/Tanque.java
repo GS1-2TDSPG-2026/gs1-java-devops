@@ -2,18 +2,21 @@ package br.com.fiap.aquaorbital.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(name = "TB_TANQUE")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "TB_TANQUE", schema = "rm562085")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
 public class Tanque {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_tanque")
-    @SequenceGenerator(name = "seq_tanque", sequenceName = "SEQ_TANQUE", allocationSize = 1)
+    @SequenceGenerator(name = "seq_tanque", sequenceName = "rm562085.SEQ_TANQUE", allocationSize = 1)
     @Column(name = "id_tanque")
     private Long id;
 
