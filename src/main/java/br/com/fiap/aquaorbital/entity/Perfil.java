@@ -2,16 +2,19 @@ package br.com.fiap.aquaorbital.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.List;
 
 @Entity
-@Table(name = "TB_PERFIL")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "TB_PERFIL", schema = "rm562085")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
 public class Perfil {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_perfil")
-    @SequenceGenerator(name = "seq_perfil", sequenceName = "SEQ_PERFIL", allocationSize = 1)
+    @SequenceGenerator(name = "seq_perfil", sequenceName = "rm562085.SEQ_PERFIL", allocationSize = 1)
     @Column(name = "id_perfil")
     private Long id;
 

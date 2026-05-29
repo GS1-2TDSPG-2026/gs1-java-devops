@@ -5,18 +5,21 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "TB_USUARIO")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "TB_USUARIO", schema = "rm562085")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
 public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
-    @SequenceGenerator(name = "seq_usuario", sequenceName = "SEQ_USUARIO", allocationSize = 1)
+    @SequenceGenerator(name = "seq_usuario", sequenceName = "rm562085.SEQ_USUARIO", allocationSize = 1)
     @Column(name = "id_usuario")
     private Long id;
 
@@ -47,13 +50,28 @@ public class Usuario implements UserDetails {
     @OneToMany(mappedBy = "usuarioResponsavel", fetch = FetchType.LAZY)
     private List<Fazenda> fazendas;
 
-    @Override public Collection<? extends GrantedAuthority> getAuthorities() {
+    // --- UserDetails ---
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + perfil.getNomePerfil()));
     }
-    @Override public String getPassword() { return senhaHash; }
-    @Override public String getUsername() { return email; }
-    @Override public boolean isAccountNonExpired() { return true; }
-    @Override public boolean isAccountNonLocked() { return "ATIVO".equals(status); }
-    @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return "ATIVO".equals(status); }
+
+    @Override
+    public String getPassword() { return senhaHash; }
+
+    @Override
+    public String getUsername() { return email; }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return "ATIVO".equals(status); }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return "ATIVO".equals(status); }
 }
