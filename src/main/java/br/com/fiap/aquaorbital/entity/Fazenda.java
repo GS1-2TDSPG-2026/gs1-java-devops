@@ -15,8 +15,8 @@ import java.util.List;
 public class Fazenda {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_fazenda")
-    @SequenceGenerator(name = "seq_fazenda", sequenceName = "rm562085.SEQ_FAZENDA", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_fazenda")
+    @SequenceGenerator(name = "sq_fazenda", sequenceName = "rm562085.SQ_FAZENDA", allocationSize = 1)
     @Column(name = "id_fazenda")
     private Long id;
 
@@ -39,9 +39,10 @@ public class Fazenda {
     @Column(name = "longitude", precision = 10, scale = 6)
     private BigDecimal longitude;
 
+    // Oracle usa "ATIVA"/"INATIVA"/"MANUTENCAO"
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
-    private String status = "ATIVO";
+    private String status = "ATIVA";
 
     @Column(name = "dt_cadastro", updatable = false)
     @Builder.Default

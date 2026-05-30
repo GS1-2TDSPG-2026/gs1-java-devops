@@ -28,11 +28,11 @@ public class JwtService {
 
     public String gerarToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
-                .claims(extraClaims)                                              // setClaims → claims
-                .subject(userDetails.getUsername())                               // setSubject → subject
-                .issuedAt(new Date(System.currentTimeMillis()))                   // setIssuedAt → issuedAt
-                .expiration(new Date(System.currentTimeMillis() + expiration))    // setExpiration → expiration
-                .signWith(getSigningKey())                                         // removido SignatureAlgorithm (inferido automaticamente)
+                .claims(extraClaims)
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -54,14 +54,14 @@ public class JwtService {
     }
 
     private Claims extrairTodosClaims(String token) {
-        return Jwts.parser()                          // parserBuilder() → parser()
-                .verifyWith(getSigningKey())           // setSigningKey → verifyWith
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseSignedClaims(token)             // parseClaimsJws → parseSignedClaims
-                .getPayload();                         // getBody → getPayload
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    private SecretKey getSigningKey() {               // Key → SecretKey
+    private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 }

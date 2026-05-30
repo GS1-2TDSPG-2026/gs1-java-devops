@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -15,8 +15,8 @@ import java.util.List;
 public class LoteBiomassa {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_lote")
-    @SequenceGenerator(name = "seq_lote", sequenceName = "rm562085.SEQ_LOTE", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_lote_biomassa")
+    @SequenceGenerator(name = "sq_lote_biomassa", sequenceName = "rm562085.SQ_LOTE_BIOMASSA", allocationSize = 1)
     @Column(name = "id_lote")
     private Long id;
 
@@ -41,9 +41,10 @@ public class LoteBiomassa {
     @Builder.Default
     private String status = "DISPONIVEL";
 
+
     @Column(name = "dt_colheita", nullable = false, updatable = false)
     @Builder.Default
-    private LocalDateTime dtColheita = LocalDateTime.now();
+    private LocalDate dtColheita = LocalDate.now();
 
     @OneToMany(mappedBy = "lote", fetch = FetchType.LAZY)
     private List<CreditoCarbono> creditos;

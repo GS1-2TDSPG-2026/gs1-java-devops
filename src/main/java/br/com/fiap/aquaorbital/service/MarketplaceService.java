@@ -29,7 +29,7 @@ public class MarketplaceService {
     private final TanqueRepository tanqueRepository;
     private final UsuarioRepository usuarioRepository;
 
-    // ── LOTES ──────────────────────────────────────────────────────────────
+
 
     @Transactional
     public LoteBiomassaResponse criarLote(CriarLoteRequest request) {
@@ -81,7 +81,7 @@ public class MarketplaceService {
         loteRepository.deleteById(id);
     }
 
-    // ── CRÉDITOS DE CARBONO ────────────────────────────────────────────────
+
 
     public Page<CreditoCarbonoResponse> listarCreditos(Pageable pageable) {
         return creditoRepository.findAll(pageable).map(this::toCreditoResponse);
@@ -104,7 +104,7 @@ public class MarketplaceService {
         return toCreditoResponse(creditoRepository.save(credito));
     }
 
-    // ── TRANSAÇÕES ─────────────────────────────────────────────────────────
+
 
     @Transactional
     public TransacaoResponse criarTransacao(CriarTransacaoRequest request, Long usuarioId) {
@@ -115,19 +115,23 @@ public class MarketplaceService {
         CreditoCarbono credito = null;
 
         if ("COMPRA_BIOMASSA".equals(request.tipoTransacao())) {
+            if (request.idLote() == null)
+                throw new IllegalArgumentException("idLote é obrigatório para COMPRA_BIOMASSA");
             lote = buscarLoteEntidade(request.idLote());
-            if (!"DISPONIVEL".equals(lote.getStatus())) {
+            if (!"DISPONIVEL".equals(lote.getStatus()))
                 throw new IllegalArgumentException("Lote não está disponível para compra");
-            }
             lote.setStatus("VENDIDO");
             loteRepository.save(lote);
         } else if ("COMPRA_CREDITO_CARBONO".equals(request.tipoTransacao())) {
+            if (request.idCredito() == null)
+                throw new IllegalArgumentException("idCredito é obrigatório para COMPRA_CREDITO_CARBONO");
             credito = buscarCreditoEntidade(request.idCredito());
-            if (!"DISPONIVEL".equals(credito.getStatus())) {
+            if (!"DISPONIVEL".equals(credito.getStatus()))
                 throw new IllegalArgumentException("Crédito não está disponível para compra");
-            }
             credito.setStatus("VENDIDO");
             creditoRepository.save(credito);
+        } else if (!"VENDA_BIOMASSA".equals(request.tipoTransacao())) {
+            throw new IllegalArgumentException("Tipo de transação inválido: " + request.tipoTransacao());
         }
 
         TransacaoMarketplace transacao = TransacaoMarketplace.builder()
@@ -137,7 +141,7 @@ public class MarketplaceService {
                 .tipoTransacao(request.tipoTransacao())
                 .quantidade(request.quantidade())
                 .valorTotal(request.valorTotal())
-                .status("CONCLUIDA")
+                .status("CONFIRMADA") // corrigido: era "CONCLUIDA", divergia do padrao do banco
                 .build();
 
         return toTransacaoResponse(transacaoRepository.save(transacao));
@@ -152,7 +156,7 @@ public class MarketplaceService {
                 .stream().map(this::toTransacaoResponse).toList();
     }
 
-    // ── HELPERS ────────────────────────────────────────────────────────────
+
 
     public static String gerarHash(String input) {
         try {

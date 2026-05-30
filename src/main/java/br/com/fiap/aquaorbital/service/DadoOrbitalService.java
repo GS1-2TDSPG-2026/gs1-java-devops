@@ -85,7 +85,7 @@ public class DadoOrbitalService {
                     .fazenda(fazenda)
                     .fonte(FONTE)
                     .dtColeta(data)
-                    .irradianciaParValue(BigDecimal.valueOf(valorPar))
+                    .irradianciaParTot(BigDecimal.valueOf(valorPar))
                     .temperaturaAmbiente(valorTemp != null && valorTemp != -999.0
                             ? BigDecimal.valueOf(valorTemp) : null)
                     .nebulosidade(valorCloud != null && valorCloud != -999.0
@@ -140,7 +140,7 @@ public class DadoOrbitalService {
                 d.getFazenda().getNome(),
                 d.getFonte(),
                 d.getDtColeta(),
-                d.getIrradianciaParValue(),
+                d.getIrradianciaParTot(),
                 d.getNebulosidade(),
                 d.getTemperaturaAmbiente(),
                 d.getLatitude(),

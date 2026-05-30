@@ -31,7 +31,6 @@ public class MarketplaceController {
 
     private final MarketplaceService marketplaceService;
 
-    // ── LOTES ──────────────────────────────────────────────────────────────
 
     @PostMapping("/lotes")
     @Operation(summary = "Publicar novo lote de biomassa")
@@ -73,7 +72,7 @@ public class MarketplaceController {
         return ResponseEntity.noContent().build();
     }
 
-    // ── CRÉDITOS DE CARBONO ────────────────────────────────────────────────
+
 
     @GetMapping("/creditos")
     @Operation(summary = "Listar todos os créditos de carbono (paginado)")
@@ -100,7 +99,7 @@ public class MarketplaceController {
         return ResponseEntity.ok(marketplaceService.validarCredito(id));
     }
 
-    // ── TRANSAÇÕES ─────────────────────────────────────────────────────────
+
 
     @PostMapping("/transacoes")
     @Operation(summary = "Realizar transação de compra")

@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaOrbital — API Tester</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080e14;
+            --surface: #0d1821;
+            --surface2: #122030;
+            --border: #1e3448;
+            --accent: #00d4ff;
+            --accent2: #00ff9d;
+            --accent3: #ff6b35;
+            --text: #c8dde8;
+            --text-dim: #5a7a8a;
+            --text-bright: #e8f4fa;
+            --success: #00ff9d;
+            --error: #ff4466;
+            --warning: #ffb347;
+            --method-get: #00d4ff;
+            --method-post: #00ff9d;
+            --method-put: #ffb347;
+            --method-delete: #ff4466;
+            --method-patch: #c77dff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 28px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: var(--accent2); }
+
+        .subtitle {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .base-url-bar {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .base-url-bar label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .base-url-bar input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            padding: 6px 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            border-radius: 4px;
+            width: 280px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .base-url-bar input:focus { border-color: var(--accent); }
+
+        /* Token bar */
+        .token-bar {
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .token-bar label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+        .token-bar input {
+            flex: 1;
+            min-width: 200px;
+            max-width: 600px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--accent2);
+            padding: 6px 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            border-radius: 4px;
+            outline: none;
+        }
+        .token-bar input:focus { border-color: var(--accent2); }
+
+        .token-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            border: 1px solid;
+        }
+        .token-status.has-token { color: var(--success); border-color: var(--success); }
+        .token-status.no-token { color: var(--text-dim); border-color: var(--border); }
+
+        /* Layout */
+        .app {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            height: calc(100vh - 97px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 290px;
+            min-width: 290px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .group {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            user-select: none;
+            background: var(--surface);
+            transition: background 0.15s;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            color: var(--text-bright);
+        }
+        .group-header:hover { background: var(--surface2); }
+
+        .group-icon {
+            width: 24px; height: 24px;
+            border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .group-toggle {
+            margin-left: auto;
+            color: var(--text-dim);
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        .group.open .group-toggle { transform: rotate(90deg); }
+
+        .group-items { display: none; }
+        .group.open .group-items { display: block; }
+
+        .endpoint-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 16px 9px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            transition: background 0.1s;
+            border-left: 2px solid transparent;
+        }
+        .endpoint-btn:hover { background: var(--surface2); }
+        .endpoint-btn.active {
+            background: rgba(0, 212, 255, 0.05);
+            border-left-color: var(--accent);
+            color: var(--text-bright);
+        }
+
+        .method-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            width: 46px;
+            text-align: center;
+        }
+        .GET  { color: var(--method-get);    border: 1px solid var(--method-get);    background: rgba(0,212,255,0.08); }
+        .POST { color: var(--method-post);   border: 1px solid var(--method-post);   background: rgba(0,255,157,0.08); }
+        .PUT  { color: var(--method-put);    border: 1px solid var(--method-put);    background: rgba(255,179,71,0.08); }
+        .DEL  { color: var(--method-delete); border: 1px solid var(--method-delete); background: rgba(255,68,102,0.08); }
+        .PATCH{ color: var(--method-patch);  border: 1px solid var(--method-patch);  background: rgba(199,125,255,0.08); }
+
+        .ep-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Main panel */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .request-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+        }
+        .request-panel::-webkit-scrollbar { width: 5px; }
+        .request-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .ep-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ep-title h2 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-bright);
+        }
+
+        .ep-title .ep-desc {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 3px;
+        }
+
+        .url-display {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+        .url-display strong { color: var(--text); }
+
+        /* Fields */
+        .fields-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .field label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .field label .req { color: var(--accent3); }
+
+        .field input, .field select, .field textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-bright);
+            padding: 9px 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+        .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+        .field select { cursor: pointer; }
+        .field textarea { resize: vertical; min-height: 80px; }
+
+        .section-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .nasa-section {
+            background: rgba(0, 212, 255, 0.04);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .nasa-section .section-label { color: var(--accent); }
+
+        .nasa-info {
+            font-size: 11px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        .nasa-info code {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 1px 5px;
+            border-radius: 3px;
+            color: var(--accent);
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Buttons */
+        .actions { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+        .btn-primary:hover { background: #33dcff; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+        .btn-danger:hover { background: rgba(255,68,102,0.1); }
+
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* Loading spinner */
+        .spinner {
+            width: 14px; height: 14px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+        .loading .spinner { display: block; }
+        .loading .send-icon { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Response panel */
+        .response-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0;
+        }
+
+        .response-panel {
+            height: 320px;
+            min-height: 180px;
+            max-height: 60vh;
+            resize: vertical;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .response-label {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            display: none;
+        }
+        .status-badge.show { display: inline-block; }
+        .status-2xx { background: rgba(0,255,157,0.15); color: var(--success); border: 1px solid var(--success); }
+        .status-4xx { background: rgba(255,68,102,0.15); color: var(--error); border: 1px solid var(--error); }
+        .status-5xx { background: rgba(255,179,71,0.15); color: var(--warning); border: 1px solid var(--warning); }
+
+        .response-time {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-left: auto;
+            display: none;
+        }
+        .response-time.show { display: block; }
+
+        .btn-copy-response {
+            font-size: 10px;
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            transition: all 0.15s;
+        }
+        .btn-copy-response:hover { border-color: var(--accent); color: var(--accent); }
+
+        .response-body {
+            flex: 1;
+            overflow: auto;
+            padding: 14px 20px;
+        }
+        .response-body::-webkit-scrollbar { width: 5px; height: 5px; }
+        .response-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .response-body pre {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--text);
+        }
+
+        .response-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-dim);
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .response-placeholder .big-icon { font-size: 32px; opacity: 0.3; }
+
+        /* JSON coloring */
+        .json-key { color: #7ec8e3; }
+        .json-string { color: #a8e6a3; }
+        .json-number { color: #ffb347; }
+        .json-bool { color: #c77dff; }
+        .json-null { color: var(--text-dim); }
+
+        /* Welcome screen */
+        .welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            gap: 16px;
+        }
+        .welcome-icon { font-size: 48px; }
+        .welcome h3 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-bright);
+        }
+        .welcome p { color: var(--text-dim); font-size: 12px; line-height: 1.8; max-width: 400px; }
+
+        /* Quick links */
+        .quick-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            transition: all 0.15s;
+        }
+        .quick-link:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Notification */
+        .notif {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Space Mono', monospace;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.25s;
+            pointer-events: none;
+        }
+        .notif.show { opacity: 1; transform: translateY(0); }
+        .notif.success { background: rgba(0,255,157,0.15); border: 1px solid var(--success); color: var(--success); }
+        .notif.error   { background: rgba(255,68,102,0.15); border: 1px solid var(--error);   color: var(--error); }
+        .notif.info    { background: rgba(0,212,255,0.15);  border: 1px solid var(--accent);  color: var(--accent); }
+
+        /* Scrollbar global */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <div class="logo">Aqua<span>Orbital</span></div>
+        <div class="subtitle">API Tester — v1.0</div>
+    </div>
+    <div class="base-url-bar">
+        <label>Base URL</label>
+        <input type="text" id="baseUrl" value="http://localhost:8080" placeholder="http://localhost:8080">
+    </div>
+</header>
+
+<div class="token-bar">
+    <label>🔑 JWT Token</label>
+    <input type="text" id="jwtToken" placeholder="Cole aqui o token retornado pelo /api/auth/login ...">
+    <span class="token-status no-token" id="tokenStatus">Sem token</span>
+    <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearToken()">Limpar</button>
+</div>
+
+<div class="app">
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+
+        <!-- AUTH -->
+        <div class="group open" id="grp-auth">
+            <div class="group-header" onclick="toggleGroup('grp-auth')">
+                <div class="group-icon" style="background:rgba(0,255,157,0.1);color:var(--accent2);">🔐</div>
+                Autenticação
+                <span class="group-toggle">▶</span>
+            </div>
+            <div class="group-items">
+                <button class="endpoint-btn" onclick="loadEndpoint('auth-login')">
+                    <span class="method-badge POST">POST</span>
+                    <span class="ep-label">/api/auth/login</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('auth-register')">
+                    <span class="method-badge POST">POST</span>
+                    <span class="ep-label">/api/auth/register</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- FAZENDAS -->
+        <div class="group open" id="grp-fazendas">
+            <div class="group-header" onclick="toggleGroup('grp-fazendas')">
+                <div class="group-icon" style="background:rgba(0,212,255,0.1);color:var(--accent);">🌿</div>
+                Fazendas
+                <span class="group-toggle">▶</span>
+            </div>
+            <div class="group-items">
+                <button class="endpoint-btn" onclick="loadEndpoint('faz-criar')">
+                    <span class="method-badge POST">POST</span>
+                    <span class="ep-label">/api/fazendas</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('faz-listar')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/api/fazendas</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('faz-buscar')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/api/fazendas/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('faz-dashboard')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/api/fazendas/{id}/dashboard</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('faz-atualizar')">
+                    <span class="method-badge PUT">PUT</span>
+                    <span class="ep-label">/api/fazendas/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('faz-deletar')">
+                    <span class="method-badge DEL">DEL</span>
+                    <span class="ep-label">/api/fazendas/{id}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TANQUES -->
+        <div class="group open" id="grp-tanques">
+            <div class="group-header" onclick="toggleGroup('grp-tanques')">
+                <div class="group-icon" style="background:rgba(255,179,71,0.1);color:var(--warning);">🧪</div>
+                Tanques
+                <span class="group-toggle">▶</span>
+            </div>
+            <div class="group-items">
+                <button class="endpoint-btn" onclick="loadEndpoint('tan-criar')">
+                    <span class="method-badge POST">POST</span>
+                    <span class="ep-label">/api/tanques</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('tan-listar')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/api/tanques</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('tan-por-fazenda')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/api/tanques/fazenda/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('tan-buscar')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/api/tanques/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('tan-atualizar')">
+                    <span class="method-badge PUT">PUT</span>
+                    <span class="ep-label">/api/tanques/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('tan-deletar')">
+                    <span class="method-badge DEL">DEL</span>
+                    <span class="ep-label">/api/tanques/{id}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- NASA / DADOS ORBITAIS -->
+        <div class="group open" id="grp-nasa">
+            <div class="group-header" onclick="toggleGroup('grp-nasa')">
+                <div class="group-icon" style="background:rgba(0,212,255,0.12);color:var(--accent);">🛰️</div>
+                Dados Orbitais (NASA)
+                <span class="group-toggle">▶</span>
+            </div>
+            <div class="group-items">
+                <button class="endpoint-btn" onclick="loadEndpoint('nasa-sincronizar')">
+                    <span class="method-badge POST">POST</span>
+                    <span class="ep-label">/fazenda/{id}/sincronizar</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('nasa-listar')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/fazenda/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('nasa-ultimo')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/fazenda/{id}/ultimo</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('nasa-periodo')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/fazenda/{id}/periodo</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MARKETPLACE -->
+        <div class="group open" id="grp-mkt">
+            <div class="group-header" onclick="toggleGroup('grp-mkt')">
+                <div class="group-icon" style="background:rgba(199,125,255,0.1);color:var(--method-patch);">🏪</div>
+                Marketplace
+                <span class="group-toggle">▶</span>
+            </div>
+            <div class="group-items">
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-criar-lote')">
+                    <span class="method-badge POST">POST</span>
+                    <span class="ep-label">/api/marketplace/lotes</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-listar-lotes')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/marketplace/lotes</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-lotes-disponiveis')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/lotes/disponiveis</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-buscar-lote')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/marketplace/lotes/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-status-lote')">
+                    <span class="method-badge PATCH">PATCH</span>
+                    <span class="ep-label">/lotes/{id}/status</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-deletar-lote')">
+                    <span class="method-badge DEL">DEL</span>
+                    <span class="ep-label">/marketplace/lotes/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-listar-creditos')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/marketplace/creditos</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-creditos-fazenda')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/creditos/fazenda/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-buscar-credito')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/creditos/{id}</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-validar-credito')">
+                    <span class="method-badge PATCH">PATCH</span>
+                    <span class="ep-label">/creditos/{id}/validar</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-criar-transacao')">
+                    <span class="method-badge POST">POST</span>
+                    <span class="ep-label">/marketplace/transacoes</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-listar-transacoes')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/marketplace/transacoes</span>
+                </button>
+                <button class="endpoint-btn" onclick="loadEndpoint('mkt-minhas-transacoes')">
+                    <span class="method-badge GET">GET</span>
+                    <span class="ep-label">/transacoes/minhas</span>
+                </button>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main">
+        <div class="request-panel" id="requestPanel">
+            <!-- Welcome -->
+            <div class="welcome" id="welcomeScreen">
+                <div class="welcome-icon">🛰️</div>
+                <h3>AquaOrbital API Tester</h3>
+                <p>Selecione um endpoint na barra lateral para começar.<br>
+                    Os dados da NASA POWER são integrados automaticamente a partir das coordenadas da fazenda.</p>
+                <div class="quick-links">
+                    <div class="quick-link" onclick="loadEndpoint('auth-login')">🔐 Login</div>
+                    <div class="quick-link" onclick="loadEndpoint('auth-register')">📝 Registrar</div>
+                    <div class="quick-link" onclick="loadEndpoint('faz-criar')">🌿 Nova Fazenda</div>
+                    <div class="quick-link" onclick="loadEndpoint('nasa-sincronizar')">🛰️ Sincronizar NASA</div>
+                </div>
+            </div>
+
+            <!-- Endpoint form (hidden initially) -->
+            <div id="endpointForm" style="display:none;">
+                <div class="ep-title">
+                    <span class="method-badge" id="epMethodBadge">GET</span>
+                    <div>
+                        <h2 id="epTitle">Endpoint</h2>
+                        <div class="ep-desc" id="epDesc"></div>
+                    </div>
+                </div>
+
+                <div class="url-display" id="urlDisplay"></div>
+
+                <div id="nasaNote" class="nasa-section" style="display:none;">
+                    <div class="section-label">🛰️ Integração NASA POWER</div>
+                    <div class="nasa-info">
+                        Este endpoint chama a <strong>NASA POWER API</strong> com as coordenadas da fazenda e salva os dados no banco.<br>
+                        Parâmetros coletados: <code>ALLSKY_SFC_PAR_TOT</code> (irradiância PAR), <code>T2M</code> (temperatura), <code>CLOUD_AMT</code> (nebulosidade).<br>
+                        A API é pública e não requer chave — apenas latituide/longitude válidos.
+                    </div>
+                </div>
+
+                <div id="fieldsContainer"></div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" id="sendBtn" onclick="sendRequest()">
+                        <span class="send-icon">▶ Enviar</span>
+                        <div class="spinner"></div>
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearResponse()">Limpar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response -->
+        <div class="response-panel">
+            <div class="response-header">
+                <span class="response-label">Resposta</span>
+                <span class="status-badge" id="statusBadge"></span>
+                <span class="response-time" id="responseTime"></span>
+                <button class="btn-copy-response" onclick="copyResponse()">Copiar JSON</button>
+            </div>
+            <div class="response-body" id="responseBody">
+                <div class="response-placeholder">
+                    <div class="big-icon">◉</div>
+                    <span>Aguardando requisição...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification -->
+<div class="notif" id="notif"></div>
+
+<script>
+    // ─── State ────────────────────────────────────────────────────────────────────
+    let currentEndpoint = null;
+
+    // ─── Token management ─────────────────────────────────────────────────────────
+    document.getElementById('jwtToken').addEventListener('input', function() {
+        const st = document.getElementById('tokenStatus');
+        if (this.value.trim()) {
+            st.className = 'token-status has-token';
+            st.textContent = '✓ Token ativo';
+        } else {
+            st.className = 'token-status no-token';
+            st.textContent = 'Sem token';
+        }
+    });
+
+    function clearToken() {
+        document.getElementById('jwtToken').value = '';
+        const st = document.getElementById('tokenStatus');
+        st.className = 'token-status no-token';
+        st.textContent = 'Sem token';
+    }
+
+    // ─── Endpoint definitions ─────────────────────────────────────────────────────
+    const endpoints = {
+        // AUTH
+        'auth-login': {
+            method: 'POST', title: 'Login',
+            desc: 'Autentica o usuário e retorna um token JWT.',
+            path: '/api/auth/login',
+            auth: false,
+            fields: [
+                { id: 'email', label: 'Email', type: 'text', req: true, placeholder: 'usuario@exemplo.com', default: 'admin@aquaorbital.com' },
+                { id: 'senha', label: 'Senha', type: 'password', req: true, placeholder: '••••••••', default: 'senha123' },
+            ]
+        },
+        'auth-register': {
+            method: 'POST', title: 'Registrar Usuário',
+            desc: 'Cria uma nova conta de usuário.',
+            path: '/api/auth/register',
+            auth: false,
+            fields: [
+                { id: 'nome', label: 'Nome', type: 'text', req: true, placeholder: 'João da Silva', default: 'João Produtor' },
+                { id: 'email', label: 'Email', type: 'text', req: true, placeholder: 'usuario@exemplo.com', default: 'joao@fazenda.com' },
+                { id: 'senha', label: 'Senha', type: 'password', req: true, placeholder: '••••••••', default: 'senha123' },
+                { id: 'telefone', label: 'Telefone', type: 'text', placeholder: '(11) 99999-9999', default: '(11) 99999-0001' },
+                { id: 'nomePerfil', label: 'Perfil', type: 'select', req: true,
+                    options: ['PRODUTOR', 'COMPRADOR', 'ADMIN'], default: 'PRODUTOR' },
+            ]
+        },
+
+        // FAZENDAS
+        'faz-criar': {
+            method: 'POST', title: 'Criar Fazenda',
+            desc: 'Cria uma nova fazenda biológica vinculada ao usuário logado. Requer coordenadas para a integração NASA.',
+            path: '/api/fazendas', auth: true,
+            fields: [
+                { id: 'nome', label: 'Nome', type: 'text', req: true, placeholder: 'Fazenda Microalgas SP', default: 'Fazenda Aqua SP' },
+                { id: 'cidade', label: 'Cidade', type: 'text', req: true, placeholder: 'São Paulo', default: 'São Paulo' },
+                { id: 'uf', label: 'UF', type: 'text', req: true, placeholder: 'SP', default: 'SP' },
+                { id: 'latitude', label: 'Latitude', type: 'text', req: false, placeholder: '-23.55', default: '-23.5505' },
+                { id: 'longitude', label: 'Longitude', type: 'text', req: false, placeholder: '-46.63', default: '-46.6333' },
+            ]
+        },
+        'faz-listar': {
+            method: 'GET', title: 'Listar Fazendas',
+            desc: 'Lista todas as fazendas com paginação.',
+            path: '/api/fazendas', auth: true,
+            fields: [
+                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
+                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
+                { id: 'sort', label: 'Ordenar por', type: 'text', placeholder: 'nome', default: 'nome', param: true },
+            ]
+        },
+        'faz-buscar': {
+            method: 'GET', title: 'Buscar Fazenda por ID',
+            desc: 'Retorna os dados completos de uma fazenda.',
+            path: '/api/fazendas/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'faz-dashboard': {
+            method: 'GET', title: 'Dashboard da Fazenda',
+            desc: 'Retorna status, tanques, previsões e créditos de carbono da fazenda.',
+            path: '/api/fazendas/{id}/dashboard', auth: true,
+            fields: [
+                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'faz-atualizar': {
+            method: 'PUT', title: 'Atualizar Fazenda',
+            desc: 'Atualiza dados de uma fazenda existente.',
+            path: '/api/fazendas/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+                { id: 'nome', label: 'Nome', type: 'text', placeholder: 'Novo nome' },
+                { id: 'cidade', label: 'Cidade', type: 'text', placeholder: 'Cidade' },
+                { id: 'uf', label: 'UF', type: 'text', placeholder: 'SP' },
+                { id: 'latitude', label: 'Latitude', type: 'text', placeholder: '-23.55' },
+                { id: 'longitude', label: 'Longitude', type: 'text', placeholder: '-46.63' },
+                { id: 'status', label: 'Status', type: 'select', options: ['', 'ATIVA', 'INATIVA', 'MANUTENCAO'] },
+            ]
+        },
+        'faz-deletar': {
+            method: 'DELETE', title: 'Remover Fazenda',
+            desc: 'Remove permanentemente uma fazenda.',
+            path: '/api/fazendas/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+
+        // TANQUES
+        'tan-criar': {
+            method: 'POST', title: 'Criar Tanque',
+            desc: 'Cadastra um novo tanque ou biofotorreator vinculado a uma fazenda.',
+            path: '/api/tanques', auth: true,
+            fields: [
+                { id: 'idFazenda', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1' },
+                { id: 'codigoTanque', label: 'Código do Tanque', type: 'text', req: true, placeholder: 'TQ-001', default: 'TQ-001' },
+                { id: 'tipoAlga', label: 'Tipo de Alga', type: 'text', req: true, placeholder: 'Spirulina platensis', default: 'Spirulina platensis' },
+                { id: 'capacidadeLitros', label: 'Capacidade (Litros)', type: 'text', req: true, placeholder: '1000', default: '1000' },
+                { id: 'phMin', label: 'pH Mínimo (0-14)', type: 'text', placeholder: '6.5', default: '6.5' },
+                { id: 'phMax', label: 'pH Máximo (0-14)', type: 'text', placeholder: '8.5', default: '8.5' },
+                { id: 'temperaturaMin', label: 'Temperatura Mín (°C)', type: 'text', placeholder: '20', default: '20' },
+                { id: 'temperaturaMax', label: 'Temperatura Máx (°C)', type: 'text', placeholder: '35', default: '35' },
+                { id: 'dtInstalacao', label: 'Data de Instalação', type: 'text', placeholder: '2025-01-15', default: '2025-01-15' },
+            ]
+        },
+        'tan-listar': {
+            method: 'GET', title: 'Listar Tanques',
+            desc: 'Lista todos os tanques com paginação.',
+            path: '/api/tanques', auth: true,
+            fields: [
+                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
+                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
+            ]
+        },
+        'tan-por-fazenda': {
+            method: 'GET', title: 'Tanques por Fazenda',
+            desc: 'Lista todos os tanques de uma fazenda específica.',
+            path: '/api/tanques/fazenda/{fazendaId}', auth: true,
+            fields: [
+                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'tan-buscar': {
+            method: 'GET', title: 'Buscar Tanque por ID',
+            desc: 'Retorna dados de um tanque específico.',
+            path: '/api/tanques/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'tan-atualizar': {
+            method: 'PUT', title: 'Atualizar Tanque',
+            desc: 'Atualiza os dados de um tanque existente.',
+            path: '/api/tanques/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+                { id: 'tipoAlga', label: 'Tipo de Alga', type: 'text', placeholder: 'Chlorella vulgaris' },
+                { id: 'capacidadeLitros', label: 'Capacidade (Litros)', type: 'text', placeholder: '1500' },
+                { id: 'phMin', label: 'pH Mínimo', type: 'text', placeholder: '6.0' },
+                { id: 'phMax', label: 'pH Máximo', type: 'text', placeholder: '9.0' },
+                { id: 'temperaturaMin', label: 'Temperatura Mín (°C)', type: 'text', placeholder: '18' },
+                { id: 'temperaturaMax', label: 'Temperatura Máx (°C)', type: 'text', placeholder: '38' },
+                { id: 'status', label: 'Status', type: 'select', options: ['', 'ATIVO', 'INATIVO', 'MANUTENCAO'] },
+            ]
+        },
+        'tan-deletar': {
+            method: 'DELETE', title: 'Remover Tanque',
+            desc: 'Remove permanentemente um tanque.',
+            path: '/api/tanques/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+
+        // NASA / DADOS ORBITAIS
+        'nasa-sincronizar': {
+            method: 'POST', title: 'Sincronizar Dados NASA POWER',
+            desc: 'Chama a NASA POWER API com as coordenadas da fazenda e salva irradiância PAR, temperatura e nebulosidade no Oracle.',
+            path: '/api/dados-orbitais/fazenda/{fazendaId}/sincronizar',
+            auth: true, nasa: true,
+            fields: [
+                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'nasa-listar': {
+            method: 'GET', title: 'Listar Dados Orbitais da Fazenda',
+            desc: 'Retorna todos os dados orbitais registrados de uma fazenda.',
+            path: '/api/dados-orbitais/fazenda/{fazendaId}', auth: true,
+            fields: [
+                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'nasa-ultimo': {
+            method: 'GET', title: 'Último Dado Orbital',
+            desc: 'Retorna o dado orbital mais recente de uma fazenda.',
+            path: '/api/dados-orbitais/fazenda/{fazendaId}/ultimo', auth: true,
+            fields: [
+                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'nasa-periodo': {
+            method: 'GET', title: 'Dados Orbitais por Período',
+            desc: 'Lista dados orbitais de uma fazenda em um intervalo de datas.',
+            path: '/api/dados-orbitais/fazenda/{fazendaId}/periodo', auth: true,
+            fields: [
+                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+                { id: 'inicio', label: 'Data Início (YYYY-MM-DD)', type: 'text', req: true, placeholder: '2025-05-01', default: '2025-05-01', param: true },
+                { id: 'fim', label: 'Data Fim (YYYY-MM-DD)', type: 'text', req: true, placeholder: '2025-05-29', default: '2025-05-29', param: true },
+            ]
+        },
+
+        // MARKETPLACE — LOTES
+        'mkt-criar-lote': {
+            method: 'POST', title: 'Criar Lote de Biomassa',
+            desc: 'Publica um novo lote de biomassa no marketplace.',
+            path: '/api/marketplace/lotes', auth: true,
+            fields: [
+                { id: 'idFazenda', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1' },
+                { id: 'idTanque', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1' },
+                { id: 'taxonomiaAlga', label: 'Taxonomia da Alga', type: 'text', req: true, placeholder: 'Spirulina platensis', default: 'Spirulina platensis' },
+                { id: 'pesoKg', label: 'Peso (kg)', type: 'text', req: true, placeholder: '100.0', default: '100.0' },
+                { id: 'precoUnitario', label: 'Preço Unitário (R$)', type: 'text', req: true, placeholder: '25.00', default: '25.00' },
+            ]
+        },
+        'mkt-listar-lotes': {
+            method: 'GET', title: 'Listar Lotes (Paginado)',
+            desc: 'Lista todos os lotes do marketplace com paginação.',
+            path: '/api/marketplace/lotes', auth: true,
+            fields: [
+                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
+                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
+            ]
+        },
+        'mkt-lotes-disponiveis': {
+            method: 'GET', title: 'Lotes Disponíveis',
+            desc: 'Lista todos os lotes com status disponível para compra.',
+            path: '/api/marketplace/lotes/disponiveis', auth: true,
+            fields: []
+        },
+        'mkt-buscar-lote': {
+            method: 'GET', title: 'Buscar Lote por ID',
+            desc: 'Retorna detalhes de um lote específico.',
+            path: '/api/marketplace/lotes/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'mkt-status-lote': {
+            method: 'PATCH', title: 'Atualizar Status do Lote',
+            desc: 'Altera o status de um lote (DISPONIVEL, RESERVADO, VENDIDO, CANCELADO).',
+            path: '/api/marketplace/lotes/{id}/status', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+                { id: 'status', label: 'Status', type: 'select', req: true,
+                    options: ['DISPONIVEL', 'RESERVADO', 'VENDIDO', 'CANCELADO'], default: 'DISPONIVEL' },
+            ]
+        },
+        'mkt-deletar-lote': {
+            method: 'DELETE', title: 'Remover Lote',
+            desc: 'Remove permanentemente um lote do marketplace.',
+            path: '/api/marketplace/lotes/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+
+        // MARKETPLACE — CRÉDITOS
+        'mkt-listar-creditos': {
+            method: 'GET', title: 'Listar Créditos de Carbono',
+            desc: 'Lista todos os créditos de carbono registrados.',
+            path: '/api/marketplace/creditos', auth: true,
+            fields: [
+                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
+                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
+            ]
+        },
+        'mkt-creditos-fazenda': {
+            method: 'GET', title: 'Extrato de CO₂ por Fazenda',
+            desc: 'Lista todos os créditos de carbono de uma fazenda.',
+            path: '/api/marketplace/creditos/fazenda/{fazendaId}', auth: true,
+            fields: [
+                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'mkt-buscar-credito': {
+            method: 'GET', title: 'Buscar Crédito por ID',
+            desc: 'Retorna detalhes de um crédito de carbono.',
+            path: '/api/marketplace/creditos/{id}', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Crédito', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+        'mkt-validar-credito': {
+            method: 'PATCH', title: 'Validar Crédito de Carbono',
+            desc: 'Marca um crédito de carbono como validado.',
+            path: '/api/marketplace/creditos/{id}/validar', auth: true,
+            fields: [
+                { id: 'id', label: 'ID do Crédito', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
+            ]
+        },
+
+        // MARKETPLACE — TRANSAÇÕES
+        'mkt-criar-transacao': {
+            method: 'POST', title: 'Criar Transação',
+            desc: 'Realiza uma transação de compra de lote ou crédito de carbono.',
+            path: '/api/marketplace/transacoes', auth: true,
+            fields: [
+                { id: 'idLote', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1' },
+                { id: 'idCredito', label: 'ID do Crédito (opcional)', type: 'text', placeholder: '' },
+                { id: 'tipoTransacao', label: 'Tipo de Transação', type: 'select', req: true,
+                    options: ['COMPRA_BIOMASSA', 'COMPRA_CREDITO_CARBONO', 'VENDA_BIOMASSA'], default: 'COMPRA_BIOMASSA' },
+                { id: 'quantidade', label: 'Quantidade', type: 'text', req: true, placeholder: '10.0', default: '10.0' },
+                { id: 'valorTotal', label: 'Valor Total (R$)', type: 'text', req: true, placeholder: '250.00', default: '250.00' },
+            ]
+        },
+        'mkt-listar-transacoes': {
+            method: 'GET', title: 'Listar Transações',
+            desc: 'Lista todas as transações com paginação.',
+            path: '/api/marketplace/transacoes', auth: true,
+            fields: [
+                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
+                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
+            ]
+        },
+        'mkt-minhas-transacoes': {
+            method: 'GET', title: 'Minhas Transações',
+            desc: 'Lista as transações do usuário autenticado.',
+            path: '/api/marketplace/transacoes/minhas', auth: true,
+            fields: []
+        },
+    };
+
+    // ─── UI Helpers ───────────────────────────────────────────────────────────────
+    function toggleGroup(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('open');
+    }
+
+    function notify(msg, type = 'info') {
+        const n = document.getElementById('notif');
+        n.textContent = msg;
+        n.className = `notif ${type} show`;
+        setTimeout(() => n.classList.remove('show'), 2800);
+    }
+
+    function methodClass(m) {
+        const map = { GET:'GET', POST:'POST', PUT:'PUT', DELETE:'DEL', PATCH:'PATCH' };
+        return map[m] || 'GET';
+    }
+
+    function loadEndpoint(id) {
+        currentEndpoint = id;
+        const ep = endpoints[id];
+        if (!ep) return;
+
+        // Highlight sidebar
+        document.querySelectorAll('.endpoint-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.endpoint-btn').forEach(b => {
+            if (b.getAttribute('onclick') === `loadEndpoint('${id}')`) b.classList.add('active');
+        });
+
+        // Hide welcome, show form
+        document.getElementById('welcomeScreen').style.display = 'none';
+        document.getElementById('endpointForm').style.display = 'block';
+
+        // Set method badge
+        const badge = document.getElementById('epMethodBadge');
+        badge.textContent = ep.method;
+        badge.className = 'method-badge ' + methodClass(ep.method);
+
+        document.getElementById('epTitle').textContent = ep.title;
+        document.getElementById('epDesc').textContent = ep.desc || '';
+
+        // NASA note
+        document.getElementById('nasaNote').style.display = ep.nasa ? 'block' : 'none';
+
+        // URL display
+        const base = document.getElementById('baseUrl').value.replace(/\/$/, '');
+        document.getElementById('urlDisplay').innerHTML =
+            `<strong>${ep.method}</strong> ${base}<span style="color:var(--accent)">${ep.path}</span>`;
+
+        // Render fields
+        const container = document.getElementById('fieldsContainer');
+        container.innerHTML = '';
+
+        const pathFields = ep.fields.filter(f => f.pathVar);
+        const bodyFields = ep.fields.filter(f => !f.pathVar && !f.param);
+        const paramFields = ep.fields.filter(f => f.param);
+
+        if (pathFields.length) {
+            container.innerHTML += `<div class="section-label" style="margin-bottom:12px;">Path Variables</div>`;
+            container.innerHTML += renderFieldsGrid(pathFields);
+        }
+        if (bodyFields.length) {
+            const isGet = ['GET', 'DELETE'].includes(ep.method);
+            if (!isGet) {
+                container.innerHTML += `<div class="section-label" style="margin-bottom:12px;margin-top:${pathFields.length?16:0}px;">Request Body</div>`;
+                container.innerHTML += renderFieldsGrid(bodyFields);
+            }
+        }
+        if (paramFields.length) {
+            container.innerHTML += `<div class="section-label" style="margin-bottom:12px;margin-top:${(pathFields.length||bodyFields.length)?16:0}px;">Query Params</div>`;
+            container.innerHTML += renderFieldsGrid(paramFields);
+        }
+
+        // Clear response
+        clearResponse();
+    }
+
+    function renderFieldsGrid(fields) {
+        let html = '<div class="fields-grid">';
+        fields.forEach(f => {
+            html += `<div class="field">`;
+            html += `<label>${f.label}${f.req ? ' <span class="req">*</span>' : ''}</label>`;
+            if (f.type === 'select') {
+                html += `<select id="field_${f.id}">`;
+                (f.options || []).forEach(o => {
+                    html += `<option value="${o}" ${o === (f.default||'') ? 'selected' : ''}>${o || '— selecione —'}</option>`;
+                });
+                html += `</select>`;
+            } else {
+                html += `<input type="${f.type||'text'}" id="field_${f.id}"
+        placeholder="${f.placeholder||''}"
+        value="${f.default||''}">`;
+            }
+            html += `</div>`;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    // ─── Request execution ────────────────────────────────────────────────────────
+    async function sendRequest() {
+        const ep = endpoints[currentEndpoint];
+        if (!ep) return;
+
+        const btn = document.getElementById('sendBtn');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        const base = document.getElementById('baseUrl').value.replace(/\/$/, '');
+        const token = document.getElementById('jwtToken').value.trim();
+
+        // Build URL
+        let path = ep.path;
+        const queryParams = [];
+        const bodyObj = {};
+
+        ep.fields.forEach(f => {
+            const el = document.getElementById('field_' + f.id);
+            if (!el) return;
+            const val = el.value.trim();
+
+            if (f.pathVar) {
+                path = path.replace(`{${f.id}}`, val || `{${f.id}}`);
+            } else if (f.param) {
+                if (val) queryParams.push(`${encodeURIComponent(f.id)}=${encodeURIComponent(val)}`);
+            } else {
+                if (val) bodyObj[f.id] = isNaN(val) ? val : (val.includes('.') ? parseFloat(val) : (val === 'true' ? true : val === 'false' ? false : val));
+            }
+        });
+
+        let url = base + path;
+        if (queryParams.length) url += '?' + queryParams.join('&');
+
+        // Update URL display live
+        document.getElementById('urlDisplay').innerHTML =
+            `<strong>${ep.method}</strong> <span style="color:var(--accent)">${url}</span>`;
+
+        const headers = { 'Content-Type': 'application/json' };
+        if (ep.auth && token) headers['Authorization'] = 'Bearer ' + token;
+
+        const options = { method: ep.method, headers };
+        if (!['GET','DELETE'].includes(ep.method) && Object.keys(bodyObj).length > 0) {
+            options.body = JSON.stringify(bodyObj);
+        }
+
+        const t0 = performance.now();
+
+        try {
+            const resp = await fetch(url, options);
+            const elapsed = Math.round(performance.now() - t0);
+
+            let text = await resp.text();
+            let parsed = null;
+            try { parsed = JSON.parse(text); } catch(e) {}
+
+            // Auto-extract token from login response
+            if (currentEndpoint === 'auth-login' && parsed && parsed.token) {
+                document.getElementById('jwtToken').value = parsed.token;
+                document.getElementById('tokenStatus').className = 'token-status has-token';
+                document.getElementById('tokenStatus').textContent = '✓ Token ativo';
+                notify('Token JWT salvo automaticamente!', 'success');
+            }
+
+            showResponse(resp.status, parsed || text, elapsed);
+        } catch (err) {
+            showResponse(0, { error: err.message, tip: 'Verifique se a API está rodando e o CORS está habilitado.' }, 0);
+            notify('Falha na conexão — verifique a Base URL', 'error');
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    }
+
+    function showResponse(status, data, ms) {
+        const badge = document.getElementById('statusBadge');
+        const timeEl = document.getElementById('responseTime');
+        const body = document.getElementById('responseBody');
+
+        badge.textContent = status || 'Erro';
+        badge.className = 'status-badge show ' +
+            (status >= 200 && status < 300 ? 'status-2xx' : status >= 400 && status < 500 ? 'status-4xx' : status >= 500 ? 'status-5xx' : 'status-4xx');
+
+        if (ms) {
+            timeEl.textContent = `${ms} ms`;
+            timeEl.className = 'response-time show';
+        }
+
+        body.innerHTML = `<pre>${colorizeJSON(typeof data === 'string' ? data : JSON.stringify(data, null, 2))}</pre>`;
+    }
+
+    function clearResponse() {
+        document.getElementById('statusBadge').className = 'status-badge';
+        document.getElementById('responseTime').className = 'response-time';
+        document.getElementById('responseBody').innerHTML = `
+    <div class="response-placeholder">
+      <div class="big-icon">◉</div>
+      <span>Aguardando requisição...</span>
+    </div>`;
+    }
+
+    function copyResponse() {
+        const pre = document.querySelector('#responseBody pre');
+        if (!pre) return;
+        navigator.clipboard.writeText(pre.textContent).then(() => notify('JSON copiado!', 'success'));
+    }
+
+    // ─── JSON syntax highlighting ─────────────────────────────────────────────────
+    function colorizeJSON(str) {
+        return str
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+                if (/^"/.test(match)) {
+                    return /:$/.test(match)
+                        ? `<span class="json-key">${match}</span>`
+                        : `<span class="json-string">${match}</span>`;
+                }
+                if (/true|false/.test(match)) return `<span class="json-bool">${match}</span>`;
+                if (/null/.test(match)) return `<span class="json-null">${match}</span>`;
+                return `<span class="json-number">${match}</span>`;
+            });
+    }
+
+    // ─── Update URL display on baseUrl change ─────────────────────────────────────
+    document.getElementById('baseUrl').addEventListener('input', () => {
+        if (currentEndpoint) loadEndpoint(currentEndpoint);
+    });
+</script>
+</body>
+</html>

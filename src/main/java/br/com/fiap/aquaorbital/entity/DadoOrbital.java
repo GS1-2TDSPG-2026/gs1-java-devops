@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class DadoOrbital {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_dado_orbital")
-    @SequenceGenerator(name = "seq_dado_orbital", sequenceName = "rm562085.SEQ_DADO_ORBITAL", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_dado_orbital")
+    @SequenceGenerator(name = "sq_dado_orbital", sequenceName = "rm562085.SQ_DADO_ORBITAL", allocationSize = 1)
     @Column(name = "id_dado_orbital")
     private Long id;
 
@@ -28,7 +28,7 @@ public class DadoOrbital {
     private LocalDate dtColeta;
 
     @Column(name = "irradiancia_par", precision = 10, scale = 4)
-    private BigDecimal irradianciaParValue;
+    private BigDecimal irradianciaParTot;
 
     @Column(name = "nebulosidade", precision = 5, scale = 2)
     private BigDecimal nebulosidade;
