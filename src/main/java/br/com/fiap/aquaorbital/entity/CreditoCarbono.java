@@ -15,8 +15,8 @@ import java.util.List;
 public class CreditoCarbono {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_credito")
-    @SequenceGenerator(name = "seq_credito", sequenceName = "rm562085.SEQ_CREDITO", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_credito_carbono")
+    @SequenceGenerator(name = "sq_credito_carbono", sequenceName = "rm562085.SQ_CREDITO_CARBONO", allocationSize = 1)
     @Column(name = "id_credito")
     private Long id;
 

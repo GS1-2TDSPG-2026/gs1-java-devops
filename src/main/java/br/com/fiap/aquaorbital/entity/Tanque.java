@@ -15,8 +15,8 @@ import java.util.List;
 public class Tanque {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_tanque")
-    @SequenceGenerator(name = "seq_tanque", sequenceName = "rm562085.SEQ_TANQUE", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_tanque")
+    @SequenceGenerator(name = "sq_tanque", sequenceName = "rm562085.SQ_TANQUE", allocationSize = 1)
     @Column(name = "id_tanque")
     private Long id;
 

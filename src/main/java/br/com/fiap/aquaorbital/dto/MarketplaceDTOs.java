@@ -29,8 +29,9 @@ public class MarketplaceDTOs {
     ) {}
 
     public record CriarTransacaoRequest(
-            @NotNull(message = "ID do lote ou crédito é obrigatório")
+
             Long idLote,
+
 
             Long idCredito,
 

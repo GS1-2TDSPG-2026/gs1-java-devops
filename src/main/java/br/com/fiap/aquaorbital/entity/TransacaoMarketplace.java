@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class TransacaoMarketplace {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transacao")
-    @SequenceGenerator(name = "seq_transacao", sequenceName = "rm562085.SEQ_TRANSACAO", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_transacao_marketplace")
+    @SequenceGenerator(name = "sq_transacao_marketplace", sequenceName = "rm562085.SQ_TRANSACAO_MARKETPLACE", allocationSize = 1)
     @Column(name = "id_transacao")
     private Long id;
 

@@ -18,8 +18,8 @@ import java.util.List;
 public class Usuario implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
-    @SequenceGenerator(name = "seq_usuario", sequenceName = "rm562085.SEQ_USUARIO", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_usuario")
+    @SequenceGenerator(name = "sq_usuario", sequenceName = "rm562085.SQ_USUARIO", allocationSize = 1)
     @Column(name = "id_usuario")
     private Long id;
 
@@ -39,9 +39,10 @@ public class Usuario implements UserDetails {
     @Column(name = "telefone", length = 20)
     private String telefone;
 
+
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
-    private String status = "ATIVO";
+    private String status = "A";
 
     @Column(name = "dt_criacao", updatable = false)
     @Builder.Default
@@ -50,7 +51,7 @@ public class Usuario implements UserDetails {
     @OneToMany(mappedBy = "usuarioResponsavel", fetch = FetchType.LAZY)
     private List<Fazenda> fazendas;
 
-    // --- UserDetails ---
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -67,11 +68,11 @@ public class Usuario implements UserDetails {
     public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() { return "ATIVO".equals(status); }
+    public boolean isAccountNonLocked() { return "A".equals(status); }
 
     @Override
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return "ATIVO".equals(status); }
+    public boolean isEnabled() { return "A".equals(status); }
 }

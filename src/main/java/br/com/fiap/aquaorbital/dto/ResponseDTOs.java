@@ -26,7 +26,7 @@ public class ResponseDTOs {
             String nomeFazenda,
             String fonte,
             LocalDate dtColeta,
-            BigDecimal irradianciaParValue,
+            BigDecimal irradianciaParTot,
             BigDecimal nebulosidade,
             BigDecimal temperaturaAmbiente,
             BigDecimal latitude,
@@ -36,7 +36,7 @@ public class ResponseDTOs {
 
     public record LoteBiomassaResponse(Long id, Long idFazenda, String nomeFazenda, Long idTanque,
                                        String codigoTanque, String taxonomiaAlga, BigDecimal pesoKg,
-                                       BigDecimal precoUnitario, String status, LocalDateTime dtColheita) {}
+                                       BigDecimal precoUnitario, String status, LocalDate dtColheita) {}
 
     public record CreditoCarbonoResponse(Long id, Long idFazenda, String nomeFazenda, Long idLote,
                                          BigDecimal co2Toneladas, String hashAuditoria,
