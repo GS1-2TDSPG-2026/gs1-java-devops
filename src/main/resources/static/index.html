@@ -3,1448 +3,943 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaOrbital — API Tester</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>AquaOrbital — Sistema</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #080e14;
-            --surface: #0d1821;
-            --surface2: #122030;
-            --border: #1e3448;
-            --accent: #00d4ff;
-            --accent2: #00ff9d;
-            --accent3: #ff6b35;
-            --text: #c8dde8;
-            --text-dim: #5a7a8a;
-            --text-bright: #e8f4fa;
-            --success: #00ff9d;
-            --error: #ff4466;
-            --warning: #ffb347;
-            --method-get: #00d4ff;
-            --method-post: #00ff9d;
-            --method-put: #ffb347;
-            --method-delete: #ff4466;
-            --method-patch: #c77dff;
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#080d12;--surface:#0e1520;--surface2:#141e2e;--surface3:#1a2538;
+            --border:#1e2d42;--border2:#243348;
+            --cyan:#00d4ff;--cyan-dim:rgba(0,212,255,.12);--cyan-glow:rgba(0,212,255,.3);
+            --green:#00e5a0;--green-dim:rgba(0,229,160,.1);
+            --amber:#ffb800;--amber-dim:rgba(255,184,0,.1);
+            --red:#ff4466;--red-dim:rgba(255,68,102,.1);
+            --blue:#4d9fff;--blue-dim:rgba(77,159,255,.1);
+            --text:#e2eaf5;--text2:#7a93b4;--text3:#3d5270;
+            --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+            --r:6px;--r2:10px;
         }
+        body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;overflow-x:hidden}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* SCROLLBAR */
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Space Mono', monospace;
-            font-size: 13px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        /* GRID BG */
+        body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.3;pointer-events:none;z-index:0}
 
-        /* Header */
-        header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 18px 28px;
-            border-bottom: 1px solid var(--border);
-            background: var(--surface);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        /* ─── AUTH ─── */
+        #authScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;position:relative;z-index:1}
+        #authScreen::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(0,212,255,.08),transparent 70%);pointer-events:none}
+        .auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:36px;width:100%;max-width:440px;position:relative;box-shadow:0 0 60px rgba(0,0,0,.6)}
+        .auth-card::before{content:'';position:absolute;inset:-1px;border-radius:15px;background:linear-gradient(135deg,rgba(0,212,255,.15),transparent 50%,rgba(0,229,160,.08));pointer-events:none;z-index:-1}
+        .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+        .auth-logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px var(--cyan-glow)}
+        .auth-logo-text{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-1px}
+        .auth-logo-text em{color:var(--cyan);font-style:normal}
+        .auth-subtitle{font-size:12px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+        .auth-tabs{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);margin-bottom:24px;padding:3px;gap:3px}
+        .auth-tab{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;font-family:var(--mono);color:var(--text3);background:none;border:none;cursor:pointer;border-radius:5px;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
+        .auth-tab.active{background:var(--surface2);color:var(--cyan);box-shadow:inset 0 0 0 1px var(--border2)}
 
-        .logo {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: 20px;
-            color: var(--accent);
-            letter-spacing: -0.5px;
-        }
-        .logo span { color: var(--accent2); }
+        .fgroup{margin-bottom:14px}
+        .fgroup label{display:block;font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono)}
+        .fgroup input,.fgroup select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:var(--r);outline:none;font-size:13px;transition:border-color .2s;font-family:var(--sans)}
+        .fgroup input:focus,.fgroup select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+        .fgroup select option{background:var(--surface)}
+        .frow{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-bottom:14px}
+        .frow .fgroup{margin-bottom:0}
 
-        .subtitle {
-            font-size: 11px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        .btn-primary{width:100%;background:linear-gradient(135deg,var(--cyan),#0099cc);color:#000;border:none;padding:11px;border-radius:var(--r);font-weight:700;font-size:13px;font-family:var(--mono);cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;box-shadow:0 0 20px rgba(0,212,255,.2)}
+        .btn-primary:hover{box-shadow:0 0 30px rgba(0,212,255,.4);transform:translateY(-1px)}
+        .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+        .msg{padding:10px 14px;border-radius:var(--r);font-size:12px;margin-bottom:14px;display:none;font-family:var(--mono)}
+        .msg.success{background:var(--green-dim);border:1px solid rgba(0,229,160,.3);color:var(--green)}
+        .msg.error{background:var(--red-dim);border:1px solid rgba(255,68,102,.3);color:var(--red)}
+        .msg.visible{display:block}
 
-        .base-url-bar {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        /* ─── APP ─── */
+        #appScreen{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1}
 
-        .base-url-bar label {
-            font-size: 11px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .topbar{display:flex;align-items:center;gap:16px;padding:0 24px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+        .topbar-logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:-1px;white-space:nowrap}
+        .topbar-logo-icon{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:14px}
+        .topbar-logo em{color:var(--cyan);font-style:normal}
 
-        .base-url-bar input {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--accent);
-            padding: 6px 12px;
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            border-radius: 4px;
-            width: 280px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .base-url-bar input:focus { border-color: var(--accent); }
+        .topbar-url{display:flex;align-items:center;gap:8px;margin-left:auto}
+        .topbar-url label{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+        .topbar-url input{background:var(--bg);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:var(--r);font-family:var(--mono);font-size:11px;width:230px;outline:none;transition:border-color .2s}
+        .topbar-url input:focus{border-color:var(--cyan);color:var(--text)}
 
-        /* Token bar */
-        .token-bar {
-            background: var(--surface2);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 28px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+        .user-badge{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:5px 14px;white-space:nowrap}
+        .user-badge span{font-size:11px;color:var(--text3);font-family:var(--mono)}
+        .user-badge strong{font-size:11px;color:var(--cyan);font-family:var(--mono)}
+        .btn-logout{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 12px;border-radius:var(--r);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;white-space:nowrap}
+        .btn-logout:hover{border-color:var(--red);color:var(--red)}
 
-        .token-bar label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .layout{display:flex;flex:1}
 
-        .token-bar input {
-            flex: 1;
-            min-width: 200px;
-            max-width: 600px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--accent2);
-            padding: 6px 12px;
-            font-family: 'Space Mono', monospace;
-            font-size: 11px;
-            border-radius: 4px;
-            outline: none;
-        }
-        .token-bar input:focus { border-color: var(--accent2); }
+        nav{width:210px;min-width:210px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+        .nav-section{padding:14px 16px 5px;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-family:var(--mono)}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;color:var(--text2);font-size:12px;font-weight:500;transition:all .15s;border-left:2px solid transparent;font-family:var(--mono)}
+        .nav-item:hover{background:var(--surface2);color:var(--text)}
+        .nav-item.active{background:rgba(0,212,255,.06);color:var(--cyan);border-left-color:var(--cyan)}
+        .nav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
-        .token-status {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 3px;
-            border: 1px solid;
-        }
-        .token-status.has-token { color: var(--success); border-color: var(--success); }
-        .token-status.no-token { color: var(--text-dim); border-color: var(--border); }
+        .content{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column}
+        .page{display:none}
+        .page.active{display:flex;flex-direction:column;gap:20px}
 
-        /* Layout */
-        .app {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            height: calc(100vh - 97px);
-        }
+        .page-title{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;letter-spacing:-.5px}
+        .page-title-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
 
-        /* Sidebar */
-        .sidebar {
-            width: 290px;
-            min-width: 290px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
+        /* ─── CARDS ─── */
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+        .card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2)}
+        .card-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;font-family:var(--mono);color:var(--text2)}
+        .card-body{padding:18px}
+        .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
 
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        /* ─── FIELDS ─── */
+        .field{display:flex;flex-direction:column;gap:5px}
+        .field label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-family:var(--mono)}
+        .field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:var(--r);outline:none;font-size:13px;transition:border-color .2s;font-family:var(--sans)}
+        .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+        .field select option{background:var(--surface)}
+        .field textarea{resize:vertical;min-height:70px}
+        .form-row{display:grid;gap:12px}
+        .form-row.c2{grid-template-columns:1fr 1fr}
+        .form-row.c3{grid-template-columns:1fr 1fr 1fr}
+        .form-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
 
-        .group {
-            border-bottom: 1px solid var(--border);
-        }
+        /* ─── BUTTONS ─── */
+        .btn{padding:8px 16px;border-radius:var(--r);font-size:11px;font-weight:700;border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px}
+        .btn:disabled{opacity:.4;cursor:not-allowed}
+        .btn-cyan{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#000;box-shadow:0 0 15px rgba(0,212,255,.15)}.btn-cyan:hover{box-shadow:0 0 25px rgba(0,212,255,.3);transform:translateY(-1px)}
+        .btn-green{background:linear-gradient(135deg,var(--green),#00aa77);color:#000}.btn-green:hover{opacity:.9;transform:translateY(-1px)}
+        .btn-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,102,.3)}.btn-red:hover{background:rgba(255,68,102,.2)}
+        .btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+        .btn-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(255,184,0,.3)}.btn-amber:hover{background:rgba(255,184,0,.2)}
+        .btn-sm{padding:5px 12px;font-size:10px}
+        .btn-grp{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
-        .group-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            cursor: pointer;
-            user-select: none;
-            background: var(--surface);
-            transition: background 0.15s;
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 12px;
-            letter-spacing: 0.5px;
-            color: var(--text-bright);
-        }
-        .group-header:hover { background: var(--surface2); }
+        /* ─── RESPONSE BOX ─── */
+        .res-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);margin-top:14px;overflow:hidden}
+        .res-head{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2)}
+        .res-status{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700}
+        .s2xx{background:rgba(0,229,160,.15);color:var(--green)}
+        .s4xx{background:var(--red-dim);color:var(--red)}
+        .s5xx{background:var(--amber-dim);color:var(--amber)}
+        .s0{background:rgba(255,68,102,.15);color:var(--red)}
+        .res-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
+        .res-copy{margin-left:auto;background:none;border:1px solid var(--border);color:var(--text3);padding:2px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-family:var(--mono);transition:all .15s}
+        .res-copy:hover{color:var(--cyan);border-color:var(--cyan)}
+        .res-body{padding:12px;font-family:var(--mono);font-size:11px;line-height:1.8;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;color:var(--text2)}
+        .jk{color:#00d4ff}.js{color:#00e5a0}.jn{color:#ffb800}.jb{color:#c8a0ff}.je{color:#ff7799}
 
-        .group-icon {
-            width: 24px; height: 24px;
-            border-radius: 5px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
+        /* ─── METHOD BADGES ─── */
+        .badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+        .m-get{background:rgba(0,229,160,.15);color:var(--green)}
+        .m-post{background:rgba(0,212,255,.15);color:var(--cyan)}
+        .m-put{background:rgba(255,184,0,.15);color:var(--amber)}
+        .m-del{background:rgba(255,68,102,.15);color:var(--red)}
+        .m-patch{background:rgba(77,159,255,.15);color:var(--blue)}
 
-        .group-toggle {
-            margin-left: auto;
-            color: var(--text-dim);
-            font-size: 10px;
-            transition: transform 0.2s;
-        }
-        .group.open .group-toggle { transform: rotate(90deg); }
+        /* ─── TOKEN DISPLAY ─── */
+        .token-display{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:11px;color:var(--text3);word-break:break-all;line-height:1.7;min-height:52px}
+        .token-display.has-token{color:var(--cyan)}
 
-        .group-items { display: none; }
-        .group.open .group-items { display: block; }
+        /* ─── DIVIDER ─── */
+        .divider{height:1px;background:var(--border);margin:8px 0}
+        .empty{text-align:center;padding:32px;color:var(--text3);font-size:12px;font-family:var(--mono)}
 
-        .endpoint-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            padding: 9px 16px 9px 24px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            text-align: left;
-            color: var(--text);
-            font-family: 'Space Mono', monospace;
-            font-size: 11px;
-            transition: background 0.1s;
-            border-left: 2px solid transparent;
-        }
-        .endpoint-btn:hover { background: var(--surface2); }
-        .endpoint-btn.active {
-            background: rgba(0, 212, 255, 0.05);
-            border-left-color: var(--accent);
-            color: var(--text-bright);
-        }
+        /* ─── HINT ─── */
+        .hint{font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--mono);padding:6px 10px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)}
 
-        .method-badge {
-            font-size: 9px;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 3px;
-            flex-shrink: 0;
-            width: 46px;
-            text-align: center;
-        }
-        .GET  { color: var(--method-get);    border: 1px solid var(--method-get);    background: rgba(0,212,255,0.08); }
-        .POST { color: var(--method-post);   border: 1px solid var(--method-post);   background: rgba(0,255,157,0.08); }
-        .PUT  { color: var(--method-put);    border: 1px solid var(--method-put);    background: rgba(255,179,71,0.08); }
-        .DEL  { color: var(--method-delete); border: 1px solid var(--method-delete); background: rgba(255,68,102,0.08); }
-        .PATCH{ color: var(--method-patch);  border: 1px solid var(--method-patch);  background: rgba(199,125,255,0.08); }
-
-        .ep-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        /* Main panel */
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .request-panel {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px 28px;
-        }
-        .request-panel::-webkit-scrollbar { width: 5px; }
-        .request-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-        .ep-title {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .ep-title h2 {
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 18px;
-            color: var(--text-bright);
-        }
-
-        .ep-title .ep-desc {
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-top: 3px;
-        }
-
-        .url-display {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 10px 14px;
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-bottom: 20px;
-            word-break: break-all;
-        }
-        .url-display strong { color: var(--text); }
-
-        /* Fields */
-        .fields-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .field {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .field label {
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .field label .req { color: var(--accent3); }
-
-        .field input, .field select, .field textarea {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            color: var(--text-bright);
-            padding: 9px 12px;
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            border-radius: 5px;
-            outline: none;
-            transition: border-color 0.2s;
-            width: 100%;
-        }
-        .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
-        .field select { cursor: pointer; }
-        .field textarea { resize: vertical; min-height: 80px; }
-
-        .section-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-dim);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        .nasa-section {
-            background: rgba(0, 212, 255, 0.04);
-            border: 1px solid rgba(0, 212, 255, 0.15);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        .nasa-section .section-label { color: var(--accent); }
-
-        .nasa-info {
-            font-size: 11px;
-            color: var(--text-dim);
-            line-height: 1.7;
-            margin-bottom: 12px;
-        }
-        .nasa-info code {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            padding: 1px 5px;
-            border-radius: 3px;
-            color: var(--accent);
-            font-family: 'Space Mono', monospace;
-        }
-
-        /* Buttons */
-        .actions { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-
-        .btn {
-            padding: 10px 22px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--bg);
-        }
-        .btn-primary:hover { background: #33dcff; transform: translateY(-1px); }
-        .btn-primary:active { transform: translateY(0); }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-dim);
-            border: 1px solid var(--border);
-        }
-        .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
-
-        .btn-danger {
-            background: transparent;
-            color: var(--error);
-            border: 1px solid var(--error);
-        }
-        .btn-danger:hover { background: rgba(255,68,102,0.1); }
-
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-        /* Loading spinner */
-        .spinner {
-            width: 14px; height: 14px;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            display: none;
-        }
-        .loading .spinner { display: block; }
-        .loading .send-icon { display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Response panel */
-        .response-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0;
-        }
-
-        .response-panel {
-            height: 320px;
-            min-height: 180px;
-            max-height: 60vh;
-            resize: vertical;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-        }
-
-        .response-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 20px;
-            background: var(--surface2);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-
-        .response-label {
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 11px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--text-dim);
-        }
-
-        .status-badge {
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: 700;
-            display: none;
-        }
-        .status-badge.show { display: inline-block; }
-        .status-2xx { background: rgba(0,255,157,0.15); color: var(--success); border: 1px solid var(--success); }
-        .status-4xx { background: rgba(255,68,102,0.15); color: var(--error); border: 1px solid var(--error); }
-        .status-5xx { background: rgba(255,179,71,0.15); color: var(--warning); border: 1px solid var(--warning); }
-
-        .response-time {
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-left: auto;
-            display: none;
-        }
-        .response-time.show { display: block; }
-
-        .btn-copy-response {
-            font-size: 10px;
-            padding: 4px 10px;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            border-radius: 3px;
-            cursor: pointer;
-            font-family: 'Space Mono', monospace;
-            transition: all 0.15s;
-        }
-        .btn-copy-response:hover { border-color: var(--accent); color: var(--accent); }
-
-        .response-body {
-            flex: 1;
-            overflow: auto;
-            padding: 14px 20px;
-        }
-        .response-body::-webkit-scrollbar { width: 5px; height: 5px; }
-        .response-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-        .response-body pre {
-            font-family: 'Space Mono', monospace;
-            font-size: 11px;
-            line-height: 1.7;
-            white-space: pre-wrap;
-            word-break: break-word;
-            color: var(--text);
-        }
-
-        .response-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--text-dim);
-            gap: 8px;
-            font-size: 12px;
-        }
-
-        .response-placeholder .big-icon { font-size: 32px; opacity: 0.3; }
-
-        /* JSON coloring */
-        .json-key { color: #7ec8e3; }
-        .json-string { color: #a8e6a3; }
-        .json-number { color: #ffb347; }
-        .json-bool { color: #c77dff; }
-        .json-null { color: var(--text-dim); }
-
-        /* Welcome screen */
-        .welcome {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            text-align: center;
-            gap: 16px;
-        }
-        .welcome-icon { font-size: 48px; }
-        .welcome h3 {
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 20px;
-            color: var(--text-bright);
-        }
-        .welcome p { color: var(--text-dim); font-size: 12px; line-height: 1.8; max-width: 400px; }
-
-        /* Quick links */
-        .quick-links {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 8px;
-        }
-        .quick-link {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 14px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Space Mono', monospace;
-            font-size: 11px;
-            color: var(--text-dim);
-            transition: all 0.15s;
-        }
-        .quick-link:hover { border-color: var(--accent); color: var(--accent); }
-
-        /* Notification */
-        .notif {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-family: 'Space Mono', monospace;
-            z-index: 999;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.25s;
-            pointer-events: none;
-        }
-        .notif.show { opacity: 1; transform: translateY(0); }
-        .notif.success { background: rgba(0,255,157,0.15); border: 1px solid var(--success); color: var(--success); }
-        .notif.error   { background: rgba(255,68,102,0.15); border: 1px solid var(--error);   color: var(--error); }
-        .notif.info    { background: rgba(0,212,255,0.15);  border: 1px solid var(--accent);  color: var(--accent); }
-
-        /* Scrollbar global */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        /* ANIMATIONS */
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        .page.active{animation:fadeIn .2s ease}
+        .res-box{animation:fadeIn .15s ease}
     </style>
 </head>
 <body>
 
-<header>
-    <div>
-        <div class="logo">Aqua<span>Orbital</span></div>
-        <div class="subtitle">API Tester — v1.0</div>
-    </div>
-    <div class="base-url-bar">
-        <label>Base URL</label>
-        <input type="text" id="baseUrl" value="http://localhost:8080" placeholder="http://localhost:8080">
-    </div>
-</header>
-
-<div class="token-bar">
-    <label>🔑 JWT Token</label>
-    <input type="text" id="jwtToken" placeholder="Cole aqui o token retornado pelo /api/auth/login ...">
-    <span class="token-status no-token" id="tokenStatus">Sem token</span>
-    <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearToken()">Limpar</button>
-</div>
-
-<div class="app">
-    <!-- SIDEBAR -->
-    <nav class="sidebar" id="sidebar">
-
-        <!-- AUTH -->
-        <div class="group open" id="grp-auth">
-            <div class="group-header" onclick="toggleGroup('grp-auth')">
-                <div class="group-icon" style="background:rgba(0,255,157,0.1);color:var(--accent2);">🔐</div>
-                Autenticação
-                <span class="group-toggle">▶</span>
-            </div>
-            <div class="group-items">
-                <button class="endpoint-btn" onclick="loadEndpoint('auth-login')">
-                    <span class="method-badge POST">POST</span>
-                    <span class="ep-label">/api/auth/login</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('auth-register')">
-                    <span class="method-badge POST">POST</span>
-                    <span class="ep-label">/api/auth/register</span>
-                </button>
+<!-- ══════════════════ AUTH ══════════════════ -->
+<div id="authScreen">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">🌊</div>
+            <div>
+                <div class="auth-logo-text">Aqua<em>Orbital</em></div>
+                <div class="auth-subtitle">Sistema de Monitoramento</div>
             </div>
         </div>
 
-        <!-- FAZENDAS -->
-        <div class="group open" id="grp-fazendas">
-            <div class="group-header" onclick="toggleGroup('grp-fazendas')">
-                <div class="group-icon" style="background:rgba(0,212,255,0.1);color:var(--accent);">🌿</div>
-                Fazendas
-                <span class="group-toggle">▶</span>
-            </div>
-            <div class="group-items">
-                <button class="endpoint-btn" onclick="loadEndpoint('faz-criar')">
-                    <span class="method-badge POST">POST</span>
-                    <span class="ep-label">/api/fazendas</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('faz-listar')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/api/fazendas</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('faz-buscar')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/api/fazendas/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('faz-dashboard')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/api/fazendas/{id}/dashboard</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('faz-atualizar')">
-                    <span class="method-badge PUT">PUT</span>
-                    <span class="ep-label">/api/fazendas/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('faz-deletar')">
-                    <span class="method-badge DEL">DEL</span>
-                    <span class="ep-label">/api/fazendas/{id}</span>
-                </button>
-            </div>
+        <div class="fgroup">
+            <label>Base URL da API</label>
+            <input id="authBase" type="text" value="http://localhost:8080" placeholder="http://localhost:8080">
         </div>
 
-        <!-- TANQUES -->
-        <div class="group open" id="grp-tanques">
-            <div class="group-header" onclick="toggleGroup('grp-tanques')">
-                <div class="group-icon" style="background:rgba(255,179,71,0.1);color:var(--warning);">🧪</div>
-                Tanques
-                <span class="group-toggle">▶</span>
-            </div>
-            <div class="group-items">
-                <button class="endpoint-btn" onclick="loadEndpoint('tan-criar')">
-                    <span class="method-badge POST">POST</span>
-                    <span class="ep-label">/api/tanques</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('tan-listar')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/api/tanques</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('tan-por-fazenda')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/api/tanques/fazenda/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('tan-buscar')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/api/tanques/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('tan-atualizar')">
-                    <span class="method-badge PUT">PUT</span>
-                    <span class="ep-label">/api/tanques/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('tan-deletar')">
-                    <span class="method-badge DEL">DEL</span>
-                    <span class="ep-label">/api/tanques/{id}</span>
-                </button>
-            </div>
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
+            <button class="auth-tab" onclick="switchAuthTab('register')">Criar Conta</button>
         </div>
 
-        <!-- NASA / DADOS ORBITAIS -->
-        <div class="group open" id="grp-nasa">
-            <div class="group-header" onclick="toggleGroup('grp-nasa')">
-                <div class="group-icon" style="background:rgba(0,212,255,0.12);color:var(--accent);">🛰️</div>
-                Dados Orbitais (NASA)
-                <span class="group-toggle">▶</span>
-            </div>
-            <div class="group-items">
-                <button class="endpoint-btn" onclick="loadEndpoint('nasa-sincronizar')">
-                    <span class="method-badge POST">POST</span>
-                    <span class="ep-label">/fazenda/{id}/sincronizar</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('nasa-listar')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/fazenda/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('nasa-ultimo')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/fazenda/{id}/ultimo</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('nasa-periodo')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/fazenda/{id}/periodo</span>
-                </button>
-            </div>
+        <!-- LOGIN -->
+        <div id="loginForm">
+            <div id="loginMsg" class="msg"></div>
+            <div class="fgroup"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seu@email.com"></div>
+            <div class="fgroup"><label>Senha</label><input id="loginPass" type="password" placeholder="••••••••"></div>
+            <button class="btn-primary" onclick="doLogin()">→ Entrar</button>
         </div>
 
-        <!-- MARKETPLACE -->
-        <div class="group open" id="grp-mkt">
-            <div class="group-header" onclick="toggleGroup('grp-mkt')">
-                <div class="group-icon" style="background:rgba(199,125,255,0.1);color:var(--method-patch);">🏪</div>
-                Marketplace
-                <span class="group-toggle">▶</span>
+        <!-- REGISTER -->
+        <div id="registerForm" style="display:none">
+            <div id="registerMsg" class="msg"></div>
+            <div class="frow">
+                <div class="fgroup"><label>Nome</label><input id="regNome" type="text" placeholder="João Silva"></div>
+                <div class="fgroup"><label>E-mail</label><input id="regEmail" type="email" placeholder="joao@email.com"></div>
             </div>
-            <div class="group-items">
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-criar-lote')">
-                    <span class="method-badge POST">POST</span>
-                    <span class="ep-label">/api/marketplace/lotes</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-listar-lotes')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/marketplace/lotes</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-lotes-disponiveis')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/lotes/disponiveis</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-buscar-lote')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/marketplace/lotes/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-status-lote')">
-                    <span class="method-badge PATCH">PATCH</span>
-                    <span class="ep-label">/lotes/{id}/status</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-deletar-lote')">
-                    <span class="method-badge DEL">DEL</span>
-                    <span class="ep-label">/marketplace/lotes/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-listar-creditos')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/marketplace/creditos</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-creditos-fazenda')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/creditos/fazenda/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-buscar-credito')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/creditos/{id}</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-validar-credito')">
-                    <span class="method-badge PATCH">PATCH</span>
-                    <span class="ep-label">/creditos/{id}/validar</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-criar-transacao')">
-                    <span class="method-badge POST">POST</span>
-                    <span class="ep-label">/marketplace/transacoes</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-listar-transacoes')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/marketplace/transacoes</span>
-                </button>
-                <button class="endpoint-btn" onclick="loadEndpoint('mkt-minhas-transacoes')">
-                    <span class="method-badge GET">GET</span>
-                    <span class="ep-label">/transacoes/minhas</span>
-                </button>
+            <div class="frow">
+                <div class="fgroup"><label>Senha <span style="color:var(--text3)">(mín. 6)</span></label><input id="regPass" type="password" placeholder="senha123"></div>
+                <div class="fgroup"><label>Telefone</label><input id="regTelefone" type="tel" placeholder="+5511999999999"></div>
             </div>
-        </div>
-
-    </nav>
-
-    <!-- MAIN -->
-    <div class="main">
-        <div class="request-panel" id="requestPanel">
-            <!-- Welcome -->
-            <div class="welcome" id="welcomeScreen">
-                <div class="welcome-icon">🛰️</div>
-                <h3>AquaOrbital API Tester</h3>
-                <p>Selecione um endpoint na barra lateral para começar.<br>
-                    Os dados da NASA POWER são integrados automaticamente a partir das coordenadas da fazenda.</p>
-                <div class="quick-links">
-                    <div class="quick-link" onclick="loadEndpoint('auth-login')">🔐 Login</div>
-                    <div class="quick-link" onclick="loadEndpoint('auth-register')">📝 Registrar</div>
-                    <div class="quick-link" onclick="loadEndpoint('faz-criar')">🌿 Nova Fazenda</div>
-                    <div class="quick-link" onclick="loadEndpoint('nasa-sincronizar')">🛰️ Sincronizar NASA</div>
-                </div>
+            <div class="fgroup">
+                <label>Perfil <span style="color:var(--amber);font-size:9px">— deve existir no banco</span></label>
+                <select id="regNomePerfil">
+                    <option value="OPERADOR_CAMPO">OPERADOR_CAMPO</option>
+                    <option value="PRODUTOR">PRODUTOR</option>
+                    <option value="COMPRADOR">COMPRADOR</option>
+                    <option value="ADMIN">ADMIN</option>
+                </select>
             </div>
-
-            <!-- Endpoint form (hidden initially) -->
-            <div id="endpointForm" style="display:none;">
-                <div class="ep-title">
-                    <span class="method-badge" id="epMethodBadge">GET</span>
-                    <div>
-                        <h2 id="epTitle">Endpoint</h2>
-                        <div class="ep-desc" id="epDesc"></div>
-                    </div>
-                </div>
-
-                <div class="url-display" id="urlDisplay"></div>
-
-                <div id="nasaNote" class="nasa-section" style="display:none;">
-                    <div class="section-label">🛰️ Integração NASA POWER</div>
-                    <div class="nasa-info">
-                        Este endpoint chama a <strong>NASA POWER API</strong> com as coordenadas da fazenda e salva os dados no banco.<br>
-                        Parâmetros coletados: <code>ALLSKY_SFC_PAR_TOT</code> (irradiância PAR), <code>T2M</code> (temperatura), <code>CLOUD_AMT</code> (nebulosidade).<br>
-                        A API é pública e não requer chave — apenas latituide/longitude válidos.
-                    </div>
-                </div>
-
-                <div id="fieldsContainer"></div>
-
-                <div class="actions">
-                    <button class="btn btn-primary" id="sendBtn" onclick="sendRequest()">
-                        <span class="send-icon">▶ Enviar</span>
-                        <div class="spinner"></div>
-                    </button>
-                    <button class="btn btn-secondary" onclick="clearResponse()">Limpar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Response -->
-        <div class="response-panel">
-            <div class="response-header">
-                <span class="response-label">Resposta</span>
-                <span class="status-badge" id="statusBadge"></span>
-                <span class="response-time" id="responseTime"></span>
-                <button class="btn-copy-response" onclick="copyResponse()">Copiar JSON</button>
-            </div>
-            <div class="response-body" id="responseBody">
-                <div class="response-placeholder">
-                    <div class="big-icon">◉</div>
-                    <span>Aguardando requisição...</span>
-                </div>
-            </div>
+            <button class="btn-primary" onclick="doRegister()">→ Criar Conta</button>
         </div>
     </div>
 </div>
 
-<!-- Notification -->
-<div class="notif" id="notif"></div>
+<!-- ══════════════════ APP ══════════════════ -->
+<div id="appScreen">
+    <div class="topbar">
+        <div class="topbar-logo">
+            <div class="topbar-logo-icon">🌊</div>
+            Aqua<em>Orbital</em>
+        </div>
+        <div class="topbar-url">
+            <label>API</label>
+            <input id="appBase" type="text" value="http://localhost:8080" oninput="syncBase(this.value)">
+        </div>
+        <div class="user-badge">
+            <span>logged as</span>
+            <strong id="userNameBadge">—</strong>
+            <span id="userRoleBadge" style="color:var(--green)"></span>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">← Sair</button>
+    </div>
+
+    <div class="layout">
+        <nav>
+            <div class="nav-section">Auth</div>
+            <div class="nav-item active" onclick="goPage('auth')" data-page="auth"><div class="nav-dot" style="background:var(--red)"></div>Auth / Token</div>
+
+            <div class="nav-section">Usuários</div>
+            <div class="nav-item" onclick="goPage('usuario')" data-page="usuario"><div class="nav-dot" style="background:var(--cyan)"></div>Usuários</div>
+            <div class="nav-item" onclick="goPage('perfil')" data-page="perfil"><div class="nav-dot" style="background:#c8a0ff"></div>Perfis</div>
+
+            <div class="nav-section">Produção</div>
+            <div class="nav-item" onclick="goPage('fazenda')" data-page="fazenda"><div class="nav-dot" style="background:var(--green)"></div>Fazendas</div>
+            <div class="nav-item" onclick="goPage('tanque')" data-page="tanque"><div class="nav-dot" style="background:var(--amber)"></div>Tanques</div>
+
+            <div class="nav-section">Dados & Mercado</div>
+            <div class="nav-item" onclick="goPage('orbital')" data-page="orbital"><div class="nav-dot" style="background:var(--cyan)"></div>Dados Orbitais</div>
+            <div class="nav-item" onclick="goPage('marketplace')" data-page="marketplace"><div class="nav-dot" style="background:var(--red)"></div>Marketplace</div>
+        </nav>
+
+        <div class="content">
+
+            <!-- ═══ AUTH PAGE ═══ -->
+            <div class="page active" id="page-auth">
+                <div class="page-title">🔐 Auth / Token <div class="page-title-line"></div></div>
+
+                <div class="card-grid">
+                    <!-- REGISTER -->
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/auth/register</div></div>
+                        <div class="card-body">
+                            <div class="form-row c2">
+                                <div class="field"><label>Nome</label><input id="ar_nome" placeholder="João Silva"></div>
+                                <div class="field"><label>E-mail</label><input id="ar_email" type="email" placeholder="joao@email.com"></div>
+                            </div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>Senha <span style="color:var(--text3)">(mín. 6)</span></label><input id="ar_senha" type="password" placeholder="senha123"></div>
+                                <div class="field"><label>Telefone</label><input id="ar_telefone" placeholder="+5511999999999"></div>
+                            </div>
+                            <div class="field" style="margin-top:10px">
+                                <label>nomePerfil <span style="color:var(--amber);font-size:9px">— campo obrigatório (deve existir no banco)</span></label>
+                                <select id="ar_nomePerfil">
+                                    <option value="OPERADOR_CAMPO">OPERADOR_CAMPO</option>
+                                    <option value="PRODUTOR">PRODUTOR</option>
+                                    <option value="COMPRADOR">COMPRADOR</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                </select>
+                            </div>
+                            <div class="btn-grp">
+                                <button class="btn btn-cyan" onclick="req('POST','/api/auth/register',{nome:v('ar_nome'),email:v('ar_email'),senha:v('ar_senha'),telefone:v('ar_telefone')||undefined,nomePerfil:v('ar_nomePerfil')},'res_ar',false)">Registrar</button>
+                            </div>
+                            <div id="res_ar"></div>
+                        </div>
+                    </div>
+
+                    <!-- LOGIN -->
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/auth/login</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>E-mail</label><input id="al_email" placeholder="joao@email.com"></div>
+                            <div class="field" style="margin-top:10px"><label>Senha</label><input id="al_senha" type="password" placeholder="••••••••"></div>
+                            <div class="hint">🔑 Salva o JWT automaticamente para todas as requisições</div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="reqLogin()">Login + salvar token</button>
+                            </div>
+                            <div id="res_al"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOKEN -->
+                <div class="card">
+                    <div class="card-header"><div class="card-title">🔑 JWT Token ativo</div></div>
+                    <div class="card-body">
+                        <div class="token-display" id="tokenDisplay">Nenhum token salvo — faça o login acima.</div>
+                        <div class="btn-grp">
+                            <button class="btn btn-ghost btn-sm" onclick="copyToken()">Copiar</button>
+                            <button class="btn btn-red btn-sm" onclick="clearToken()">Limpar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ USUARIO PAGE ═══ -->
+            <div class="page" id="page-usuario">
+                <div class="page-title">👤 Usuários <div class="page-title-line"></div></div>
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/usuarios</div></div>
+                        <div class="card-body">
+                            <div class="hint">Suporta paginação: ?page=0&size=10&sort=nome</div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/usuarios',null,'res_u_all')">Listar todos</button></div>
+                            <div id="res_u_all"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/usuarios/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID do usuário</label><input id="u_get_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/usuarios/${v('u_get_id')}`,null,'res_u_id')">Buscar</button></div>
+                            <div id="res_u_id"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/usuarios/perfil/{idPerfil}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID do Perfil</label><input id="u_perf_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/usuarios/perfil/${v('u_perf_id')}`,null,'res_u_perfil')">Listar por perfil</button></div>
+                            <div id="res_u_perfil"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-put">PUT</span>/api/usuarios/{id}</div></div>
+                        <div class="card-body">
+                            <div class="form-row c2">
+                                <div class="field"><label>ID</label><input id="u_put_id" placeholder="1" type="number"></div>
+                                <div class="field"><label>Nome</label><input id="u_put_nome" placeholder="Novo nome"></div>
+                            </div>
+                            <div class="field" style="margin-top:10px"><label>E-mail</label><input id="u_put_email" type="email" placeholder="novo@email.com"></div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('PUT',`/api/usuarios/${v('u_put_id')}`,{nome:v('u_put_nome'),email:v('u_put_email')},'res_u_put')">Atualizar</button>
+                                <button class="btn btn-red" onclick="req('DELETE',`/api/usuarios/${v('u_put_id')}`,null,'res_u_put')">Deletar</button>
+                            </div>
+                            <div id="res_u_put"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ PERFIL PAGE ═══ -->
+            <div class="page" id="page-perfil">
+                <div class="page-title">🪪 Perfis <div class="page-title-line"></div></div>
+                <div class="hint" style="margin-bottom:4px">⚠️ Os perfis devem ser criados no banco antes do registro de usuários. Use <strong>POST /api/perfis</strong> abaixo ou insira via SQL: <code style="color:var(--cyan)">INSERT INTO TB_PERFIL (nome_perfil,descricao) VALUES ('PRODUTOR','...')</code></div>
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/perfis</div></div>
+                        <div class="card-body">
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/perfis',null,'res_p_all')">Listar todos</button></div>
+                            <div id="res_p_all"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/perfis/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID do perfil</label><input id="p_get_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/perfis/${v('p_get_id')}`,null,'res_p_id')">Buscar</button></div>
+                            <div id="res_p_id"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/perfis</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>nomePerfil</label><input id="p_nome" placeholder="PRODUTOR"></div>
+                            <div class="field" style="margin-top:10px"><label>Descrição</label><input id="p_desc" placeholder="Produtor de aquicultura"></div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('POST','/api/perfis',{nomePerfil:v('p_nome'),descricao:v('p_desc')},'res_p_post')">Criar perfil</button>
+                            </div>
+                            <div id="res_p_post"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ FAZENDA PAGE ═══ -->
+            <div class="page" id="page-fazenda">
+                <div class="page-title">🌾 Fazendas <div class="page-title-line"></div></div>
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/fazendas</div></div>
+                        <div class="card-body">
+                            <div class="hint">Paginado. Usuário logado verá somente suas fazendas conforme regra de negócio.</div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/fazendas',null,'res_f_all')">Listar todas</button></div>
+                            <div id="res_f_all"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/fazendas/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID da fazenda</label><input id="f_get_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/fazendas/${v('f_get_id')}`,null,'res_f_id')">Buscar</button></div>
+                            <div id="res_f_id"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/fazendas/{id}/dashboard</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID da fazenda</label><input id="f_dash_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/fazendas/${v('f_dash_id')}/dashboard`,null,'res_f_dash')">Ver dashboard</button></div>
+                            <div id="res_f_dash"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/fazendas</div></div>
+                        <div class="card-body">
+                            <div class="hint">O ID do usuário responsável é capturado automaticamente pelo JWT logado.</div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>Nome</label><input id="f_nome" placeholder="Fazenda Mar Azul"></div>
+                                <div class="field"><label>Cidade</label><input id="f_cidade" placeholder="Laguna"></div>
+                            </div>
+                            <div class="form-row c3" style="margin-top:10px">
+                                <div class="field"><label>UF <span style="color:var(--text3)">(2 chars)</span></label><input id="f_uf" placeholder="SC" maxlength="2"></div>
+                                <div class="field"><label>Latitude</label><input id="f_lat" placeholder="-28.48" type="number" step="any"></div>
+                                <div class="field"><label>Longitude</label><input id="f_lon" placeholder="-48.77" type="number" step="any"></div>
+                            </div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('POST','/api/fazendas',{nome:v('f_nome'),cidade:v('f_cidade'),uf:v('f_uf'),latitude:dec('f_lat'),longitude:dec('f_lon')},'res_f_post')">Criar</button>
+                            </div>
+                            <div id="res_f_post"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-put">PUT</span> / <span class="badge m-del">DELETE</span>&nbsp;/api/fazendas/{id}</div></div>
+                        <div class="card-body">
+                            <div class="form-row c2">
+                                <div class="field"><label>ID</label><input id="f_put_id" placeholder="1" type="number"></div>
+                                <div class="field"><label>Nome</label><input id="f_put_nome" placeholder="Novo nome"></div>
+                            </div>
+                            <div class="form-row c3" style="margin-top:10px">
+                                <div class="field"><label>Cidade</label><input id="f_put_cidade" placeholder="Nova cidade"></div>
+                                <div class="field"><label>UF</label><input id="f_put_uf" placeholder="SC" maxlength="2"></div>
+                                <div class="field"><label>Status</label><select id="f_put_status"><option value="">—</option><option value="A">A (Ativo)</option><option value="I">I (Inativo)</option></select></div>
+                            </div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('PUT',`/api/fazendas/${v('f_put_id')}`,{nome:v('f_put_nome'),cidade:v('f_put_cidade'),uf:v('f_put_uf'),status:v('f_put_status')||undefined},'res_f_put')">Atualizar</button>
+                                <button class="btn btn-red" onclick="req('DELETE',`/api/fazendas/${v('f_put_id')}`,null,'res_f_put')">Deletar</button>
+                            </div>
+                            <div id="res_f_put"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ TANQUE PAGE ═══ -->
+            <div class="page" id="page-tanque">
+                <div class="page-title">🪣 Tanques <div class="page-title-line"></div></div>
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/tanques</div></div>
+                        <div class="card-body">
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/tanques',null,'res_t_all')">Listar todos</button></div>
+                            <div id="res_t_all"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/tanques/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID do tanque</label><input id="t_get_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/tanques/${v('t_get_id')}`,null,'res_t_id')">Buscar</button></div>
+                            <div id="res_t_id"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/tanques/fazenda/{fazendaId}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID da fazenda</label><input id="t_faz_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/tanques/fazenda/${v('t_faz_id')}`,null,'res_t_faz')">Listar por fazenda</button></div>
+                            <div id="res_t_faz"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/tanques</div></div>
+                        <div class="card-body">
+                            <div class="form-row c2">
+                                <div class="field"><label>ID Fazenda</label><input id="t_fid" placeholder="1" type="number"></div>
+                                <div class="field"><label>Código do tanque</label><input id="t_cod" placeholder="TANQUE-A1"></div>
+                            </div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>Tipo de Alga</label><input id="t_alga" placeholder="Spirulina"></div>
+                                <div class="field"><label>Capacidade (L)</label><input id="t_cap" placeholder="5000" type="number"></div>
+                            </div>
+                            <div class="form-row c4" style="margin-top:10px">
+                                <div class="field"><label>pH Mín</label><input id="t_phmin" placeholder="6.5" type="number" step="0.1"></div>
+                                <div class="field"><label>pH Máx</label><input id="t_phmax" placeholder="8.0" type="number" step="0.1"></div>
+                                <div class="field"><label>Temp. Mín</label><input id="t_tmin" placeholder="18" type="number" step="0.1"></div>
+                                <div class="field"><label>Temp. Máx</label><input id="t_tmax" placeholder="30" type="number" step="0.1"></div>
+                            </div>
+                            <div class="field" style="margin-top:10px"><label>Dt. Instalação (YYYY-MM-DD)</label><input id="t_dt" placeholder="2024-01-15" type="date"></div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('POST','/api/tanques',{idFazenda:lng('t_fid'),codigoTanque:v('t_cod'),tipoAlga:v('t_alga'),capacidadeLitros:dec('t_cap'),phMin:dec('t_phmin'),phMax:dec('t_phmax'),temperaturaMin:dec('t_tmin'),temperaturaMax:dec('t_tmax'),dtInstalacao:v('t_dt')||undefined},'res_t_post')">Criar</button>
+                            </div>
+                            <div id="res_t_post"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-put">PUT</span> / <span class="badge m-del">DELETE</span>&nbsp;/api/tanques/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID do tanque</label><input id="t_put_id" placeholder="1" type="number"></div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>Tipo de Alga</label><input id="t_put_alga" placeholder="Spirulina"></div>
+                                <div class="field"><label>Capacidade (L)</label><input id="t_put_cap" placeholder="6000" type="number"></div>
+                            </div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>pH Mín</label><input id="t_put_phmin" placeholder="6.5" type="number" step="0.1"></div>
+                                <div class="field"><label>pH Máx</label><input id="t_put_phmax" placeholder="8.0" type="number" step="0.1"></div>
+                            </div>
+                            <div class="field" style="margin-top:10px"><label>Status</label><select id="t_put_status"><option value="">—</option><option value="A">A (Ativo)</option><option value="I">I (Inativo)</option></select></div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('PUT',`/api/tanques/${v('t_put_id')}`,{tipoAlga:v('t_put_alga')||undefined,capacidadeLitros:dec('t_put_cap'),phMin:dec('t_put_phmin'),phMax:dec('t_put_phmax'),status:v('t_put_status')||undefined},'res_t_put')">Atualizar</button>
+                                <button class="btn btn-red" onclick="req('DELETE',`/api/tanques/${v('t_put_id')}`,null,'res_t_put')">Deletar</button>
+                            </div>
+                            <div id="res_t_put"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ ORBITAL PAGE ═══ -->
+            <div class="page" id="page-orbital">
+                <div class="page-title">🛰 Dados Orbitais <div class="page-title-line"></div></div>
+
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dados-orbitais/fazenda/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID da fazenda</label><input id="o_faz_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('o_faz_id')}`,null,'res_o_faz')">Listar dados</button></div>
+                            <div id="res_o_faz"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dados-orbitais/fazenda/{id}/ultimo</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID da fazenda</label><input id="o_ult_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('o_ult_id')}/ultimo`,null,'res_o_ult')">Buscar último</button></div>
+                            <div id="res_o_ult"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dados-orbitais/fazenda/{id}/periodo</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID da fazenda</label><input id="o_per_id" placeholder="1" type="number"></div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>Início</label><input id="o_per_ini" type="date"></div>
+                                <div class="field"><label>Fim</label><input id="o_per_fim" type="date"></div>
+                            </div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('o_per_id')}/periodo?inicio=${v('o_per_ini')}&fim=${v('o_per_fim')}`,null,'res_o_per')">Buscar por período</button></div>
+                            <div id="res_o_per"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/dados-orbitais/fazenda/{fazendaId}/sincronizar — NASA POWER</div></div>
+                    <div class="card-body">
+                        <div class="hint">🛰 Busca dados reais de irradiância PAR, temperatura e nebulosidade da NASA POWER API usando as coordenadas da fazenda e salva no banco.</div>
+                        <div class="field" style="margin-top:12px;max-width:200px"><label>ID da fazenda</label><input id="o_sync_id" placeholder="1" type="number"></div>
+                        <div class="btn-grp">
+                            <button class="btn btn-green" onclick="req('POST',`/api/dados-orbitais/fazenda/${v('o_sync_id')}/sincronizar`,{},'res_o_sync')">🛰 Sincronizar NASA POWER</button>
+                        </div>
+                        <div id="res_o_sync"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MARKETPLACE PAGE ═══ -->
+            <div class="page" id="page-marketplace">
+                <div class="page-title">🏪 Marketplace <div class="page-title-line"></div></div>
+
+                <!-- LOTES DE BIOMASSA -->
+                <div class="page-title" style="font-size:12px;color:var(--text3);margin-bottom:4px">── Lotes de Biomassa</div>
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/lotes</div></div>
+                        <div class="card-body">
+                            <div class="btn-grp">
+                                <button class="btn btn-cyan" onclick="req('GET','/api/marketplace/lotes',null,'res_mk_lotes')">Listar lotes</button>
+                                <button class="btn btn-ghost" onclick="req('GET','/api/marketplace/lotes/disponiveis',null,'res_mk_lotes')">Apenas disponíveis</button>
+                            </div>
+                            <div id="res_mk_lotes"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/lotes/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID do lote</label><input id="mk_lote_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/marketplace/lotes/${v('mk_lote_id')}`,null,'res_mk_lote')">Buscar</button></div>
+                            <div id="res_mk_lote"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/marketplace/lotes</div></div>
+                        <div class="card-body">
+                            <div class="form-row c2">
+                                <div class="field"><label>ID Fazenda</label><input id="mk_l_fid" placeholder="1" type="number"></div>
+                                <div class="field"><label>ID Tanque</label><input id="mk_l_tid" placeholder="1" type="number"></div>
+                            </div>
+                            <div class="field" style="margin-top:10px"><label>Taxonomia da Alga</label><input id="mk_l_taxa" placeholder="Spirulina platensis"></div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>Peso (kg)</label><input id="mk_l_peso" placeholder="500.00" type="number" step="0.01"></div>
+                                <div class="field"><label>Preço unitário (R$)</label><input id="mk_l_preco" placeholder="25.00" type="number" step="0.01"></div>
+                            </div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('POST','/api/marketplace/lotes',{idFazenda:lng('mk_l_fid'),idTanque:lng('mk_l_tid'),taxonomiaAlga:v('mk_l_taxa'),pesoKg:dec('mk_l_peso'),precoUnitario:dec('mk_l_preco')},'res_mk_l_post')">Publicar lote</button>
+                            </div>
+                            <div id="res_mk_l_post"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-patch">PATCH</span>/api/marketplace/lotes/{id}/status</div></div>
+                        <div class="card-body">
+                            <div class="form-row c2">
+                                <div class="field"><label>ID do lote</label><input id="mk_ls_id" placeholder="1" type="number"></div>
+                                <div class="field"><label>Status</label><select id="mk_ls_status"><option value="DISPONIVEL">DISPONIVEL</option><option value="VENDIDO">VENDIDO</option><option value="CANCELADO">CANCELADO</option></select></div>
+                            </div>
+                            <div class="btn-grp">
+                                <button class="btn btn-amber" onclick="req('PATCH',`/api/marketplace/lotes/${v('mk_ls_id')}/status`,{status:v('mk_ls_status')},'res_mk_ls')">Atualizar status</button>
+                                <button class="btn btn-red btn-sm" onclick="req('DELETE',`/api/marketplace/lotes/${v('mk_ls_id')}`,null,'res_mk_ls')">Deletar</button>
+                            </div>
+                            <div id="res_mk_ls"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- CRÉDITOS DE CARBONO -->
+                <div class="page-title" style="font-size:12px;color:var(--text3);margin-top:8px;margin-bottom:4px">── Créditos de Carbono</div>
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/creditos</div></div>
+                        <div class="card-body">
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/marketplace/creditos',null,'res_mk_creds')">Listar créditos</button></div>
+                            <div id="res_mk_creds"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/creditos/fazenda/{id}</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID da fazenda</label><input id="mk_cf_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/marketplace/creditos/fazenda/${v('mk_cf_id')}`,null,'res_mk_cf')">Extrato CO₂</button></div>
+                            <div id="res_mk_cf"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-patch">PATCH</span>/api/marketplace/creditos/{id}/validar</div></div>
+                        <div class="card-body">
+                            <div class="field"><label>ID do crédito</label><input id="mk_cv_id" placeholder="1" type="number"></div>
+                            <div class="btn-grp"><button class="btn btn-amber" onclick="req('PATCH',`/api/marketplace/creditos/${v('mk_cv_id')}/validar`,{},'res_mk_cv')">Validar crédito</button></div>
+                            <div id="res_mk_cv"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TRANSAÇÕES -->
+                <div class="page-title" style="font-size:12px;color:var(--text3);margin-top:8px;margin-bottom:4px">── Transações</div>
+                <div class="card-grid">
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/transacoes</div></div>
+                        <div class="card-body">
+                            <div class="btn-grp">
+                                <button class="btn btn-cyan" onclick="req('GET','/api/marketplace/transacoes',null,'res_mk_trans')">Listar todas</button>
+                                <button class="btn btn-ghost" onclick="req('GET','/api/marketplace/transacoes/minhas',null,'res_mk_trans')">Minhas transações</button>
+                            </div>
+                            <div id="res_mk_trans"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/marketplace/transacoes</div></div>
+                        <div class="card-body">
+                            <div class="hint">O ID do comprador é capturado pelo JWT. Preencha apenas idLote <strong>ou</strong> idCredito conforme o tipo.</div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>ID Lote (opcional)</label><input id="mk_t_lote" placeholder="1" type="number"></div>
+                                <div class="field"><label>ID Crédito (opcional)</label><input id="mk_t_cred" placeholder="1" type="number"></div>
+                            </div>
+                            <div class="field" style="margin-top:10px">
+                                <label>Tipo de transação</label>
+                                <select id="mk_t_tipo"><option value="COMPRA_BIOMASSA">COMPRA_BIOMASSA</option><option value="COMPRA_CREDITO_CARBONO">COMPRA_CREDITO_CARBONO</option></select>
+                            </div>
+                            <div class="form-row c2" style="margin-top:10px">
+                                <div class="field"><label>Quantidade</label><input id="mk_t_qtd" placeholder="10" type="number" step="0.01"></div>
+                                <div class="field"><label>Valor total (R$)</label><input id="mk_t_val" placeholder="250.00" type="number" step="0.01"></div>
+                            </div>
+                            <div class="btn-grp">
+                                <button class="btn btn-green" onclick="req('POST','/api/marketplace/transacoes',{idLote:lng('mk_t_lote'),idCredito:lng('mk_t_cred'),tipoTransacao:v('mk_t_tipo'),quantidade:dec('mk_t_qtd'),valorTotal:dec('mk_t_val')},'res_mk_t_post')">Realizar transação</button>
+                            </div>
+                            <div id="res_mk_t_post"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- content -->
+    </div><!-- layout -->
+</div><!-- appScreen -->
 
 <script>
-    // ─── State ────────────────────────────────────────────────────────────────────
-    let currentEndpoint = null;
+    let JWT = '';
+    let BASE = 'http://localhost:8080';
 
-    // ─── Token management ─────────────────────────────────────────────────────────
-    document.getElementById('jwtToken').addEventListener('input', function() {
-        const st = document.getElementById('tokenStatus');
-        if (this.value.trim()) {
-            st.className = 'token-status has-token';
-            st.textContent = '✓ Token ativo';
-        } else {
-            st.className = 'token-status no-token';
-            st.textContent = 'Sem token';
-        }
-    });
+    // ── helpers ──
+    const v   = id => document.getElementById(id)?.value?.trim() ?? '';
+    const lng = id => { const x = parseInt(document.getElementById(id)?.value); return isNaN(x) ? null : x; };
+    const dec = id => { const x = parseFloat(document.getElementById(id)?.value); return isNaN(x) ? null : x; };
+    const el  = id => document.getElementById(id);
+    const syncBase = val => { BASE = val.replace(/\/$/,''); el('authBase').value = BASE; };
 
-    function clearToken() {
-        document.getElementById('jwtToken').value = '';
-        const st = document.getElementById('tokenStatus');
-        st.className = 'token-status no-token';
-        st.textContent = 'Sem token';
+    // ── auth screen ──
+    function switchAuthTab(t) {
+        el('loginForm').style.display    = t === 'login'    ? '' : 'none';
+        el('registerForm').style.display = t === 'register' ? '' : 'none';
+        document.querySelectorAll('.auth-tab').forEach((b, i) =>
+            b.classList.toggle('active', (i === 0 && t === 'login') || (i === 1 && t === 'register'))
+        );
     }
 
-    // ─── Endpoint definitions ─────────────────────────────────────────────────────
-    const endpoints = {
-        // AUTH
-        'auth-login': {
-            method: 'POST', title: 'Login',
-            desc: 'Autentica o usuário e retorna um token JWT.',
-            path: '/api/auth/login',
-            auth: false,
-            fields: [
-                { id: 'email', label: 'Email', type: 'text', req: true, placeholder: 'usuario@exemplo.com', default: 'admin@aquaorbital.com' },
-                { id: 'senha', label: 'Senha', type: 'password', req: true, placeholder: '••••••••', default: 'senha123' },
-            ]
-        },
-        'auth-register': {
-            method: 'POST', title: 'Registrar Usuário',
-            desc: 'Cria uma nova conta de usuário.',
-            path: '/api/auth/register',
-            auth: false,
-            fields: [
-                { id: 'nome', label: 'Nome', type: 'text', req: true, placeholder: 'João da Silva', default: 'João Produtor' },
-                { id: 'email', label: 'Email', type: 'text', req: true, placeholder: 'usuario@exemplo.com', default: 'joao@fazenda.com' },
-                { id: 'senha', label: 'Senha', type: 'password', req: true, placeholder: '••••••••', default: 'senha123' },
-                { id: 'telefone', label: 'Telefone', type: 'text', placeholder: '(11) 99999-9999', default: '(11) 99999-0001' },
-                { id: 'nomePerfil', label: 'Perfil', type: 'select', req: true,
-                    options: ['PRODUTOR', 'COMPRADOR', 'ADMIN'], default: 'PRODUTOR' },
-            ]
-        },
-
-        // FAZENDAS
-        'faz-criar': {
-            method: 'POST', title: 'Criar Fazenda',
-            desc: 'Cria uma nova fazenda biológica vinculada ao usuário logado. Requer coordenadas para a integração NASA.',
-            path: '/api/fazendas', auth: true,
-            fields: [
-                { id: 'nome', label: 'Nome', type: 'text', req: true, placeholder: 'Fazenda Microalgas SP', default: 'Fazenda Aqua SP' },
-                { id: 'cidade', label: 'Cidade', type: 'text', req: true, placeholder: 'São Paulo', default: 'São Paulo' },
-                { id: 'uf', label: 'UF', type: 'text', req: true, placeholder: 'SP', default: 'SP' },
-                { id: 'latitude', label: 'Latitude', type: 'text', req: false, placeholder: '-23.55', default: '-23.5505' },
-                { id: 'longitude', label: 'Longitude', type: 'text', req: false, placeholder: '-46.63', default: '-46.6333' },
-            ]
-        },
-        'faz-listar': {
-            method: 'GET', title: 'Listar Fazendas',
-            desc: 'Lista todas as fazendas com paginação.',
-            path: '/api/fazendas', auth: true,
-            fields: [
-                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
-                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
-                { id: 'sort', label: 'Ordenar por', type: 'text', placeholder: 'nome', default: 'nome', param: true },
-            ]
-        },
-        'faz-buscar': {
-            method: 'GET', title: 'Buscar Fazenda por ID',
-            desc: 'Retorna os dados completos de uma fazenda.',
-            path: '/api/fazendas/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'faz-dashboard': {
-            method: 'GET', title: 'Dashboard da Fazenda',
-            desc: 'Retorna status, tanques, previsões e créditos de carbono da fazenda.',
-            path: '/api/fazendas/{id}/dashboard', auth: true,
-            fields: [
-                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'faz-atualizar': {
-            method: 'PUT', title: 'Atualizar Fazenda',
-            desc: 'Atualiza dados de uma fazenda existente.',
-            path: '/api/fazendas/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-                { id: 'nome', label: 'Nome', type: 'text', placeholder: 'Novo nome' },
-                { id: 'cidade', label: 'Cidade', type: 'text', placeholder: 'Cidade' },
-                { id: 'uf', label: 'UF', type: 'text', placeholder: 'SP' },
-                { id: 'latitude', label: 'Latitude', type: 'text', placeholder: '-23.55' },
-                { id: 'longitude', label: 'Longitude', type: 'text', placeholder: '-46.63' },
-                { id: 'status', label: 'Status', type: 'select', options: ['', 'ATIVA', 'INATIVA', 'MANUTENCAO'] },
-            ]
-        },
-        'faz-deletar': {
-            method: 'DELETE', title: 'Remover Fazenda',
-            desc: 'Remove permanentemente uma fazenda.',
-            path: '/api/fazendas/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-
-        // TANQUES
-        'tan-criar': {
-            method: 'POST', title: 'Criar Tanque',
-            desc: 'Cadastra um novo tanque ou biofotorreator vinculado a uma fazenda.',
-            path: '/api/tanques', auth: true,
-            fields: [
-                { id: 'idFazenda', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1' },
-                { id: 'codigoTanque', label: 'Código do Tanque', type: 'text', req: true, placeholder: 'TQ-001', default: 'TQ-001' },
-                { id: 'tipoAlga', label: 'Tipo de Alga', type: 'text', req: true, placeholder: 'Spirulina platensis', default: 'Spirulina platensis' },
-                { id: 'capacidadeLitros', label: 'Capacidade (Litros)', type: 'text', req: true, placeholder: '1000', default: '1000' },
-                { id: 'phMin', label: 'pH Mínimo (0-14)', type: 'text', placeholder: '6.5', default: '6.5' },
-                { id: 'phMax', label: 'pH Máximo (0-14)', type: 'text', placeholder: '8.5', default: '8.5' },
-                { id: 'temperaturaMin', label: 'Temperatura Mín (°C)', type: 'text', placeholder: '20', default: '20' },
-                { id: 'temperaturaMax', label: 'Temperatura Máx (°C)', type: 'text', placeholder: '35', default: '35' },
-                { id: 'dtInstalacao', label: 'Data de Instalação', type: 'text', placeholder: '2025-01-15', default: '2025-01-15' },
-            ]
-        },
-        'tan-listar': {
-            method: 'GET', title: 'Listar Tanques',
-            desc: 'Lista todos os tanques com paginação.',
-            path: '/api/tanques', auth: true,
-            fields: [
-                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
-                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
-            ]
-        },
-        'tan-por-fazenda': {
-            method: 'GET', title: 'Tanques por Fazenda',
-            desc: 'Lista todos os tanques de uma fazenda específica.',
-            path: '/api/tanques/fazenda/{fazendaId}', auth: true,
-            fields: [
-                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'tan-buscar': {
-            method: 'GET', title: 'Buscar Tanque por ID',
-            desc: 'Retorna dados de um tanque específico.',
-            path: '/api/tanques/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'tan-atualizar': {
-            method: 'PUT', title: 'Atualizar Tanque',
-            desc: 'Atualiza os dados de um tanque existente.',
-            path: '/api/tanques/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-                { id: 'tipoAlga', label: 'Tipo de Alga', type: 'text', placeholder: 'Chlorella vulgaris' },
-                { id: 'capacidadeLitros', label: 'Capacidade (Litros)', type: 'text', placeholder: '1500' },
-                { id: 'phMin', label: 'pH Mínimo', type: 'text', placeholder: '6.0' },
-                { id: 'phMax', label: 'pH Máximo', type: 'text', placeholder: '9.0' },
-                { id: 'temperaturaMin', label: 'Temperatura Mín (°C)', type: 'text', placeholder: '18' },
-                { id: 'temperaturaMax', label: 'Temperatura Máx (°C)', type: 'text', placeholder: '38' },
-                { id: 'status', label: 'Status', type: 'select', options: ['', 'ATIVO', 'INATIVO', 'MANUTENCAO'] },
-            ]
-        },
-        'tan-deletar': {
-            method: 'DELETE', title: 'Remover Tanque',
-            desc: 'Remove permanentemente um tanque.',
-            path: '/api/tanques/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-
-        // NASA / DADOS ORBITAIS
-        'nasa-sincronizar': {
-            method: 'POST', title: 'Sincronizar Dados NASA POWER',
-            desc: 'Chama a NASA POWER API com as coordenadas da fazenda e salva irradiância PAR, temperatura e nebulosidade no Oracle.',
-            path: '/api/dados-orbitais/fazenda/{fazendaId}/sincronizar',
-            auth: true, nasa: true,
-            fields: [
-                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'nasa-listar': {
-            method: 'GET', title: 'Listar Dados Orbitais da Fazenda',
-            desc: 'Retorna todos os dados orbitais registrados de uma fazenda.',
-            path: '/api/dados-orbitais/fazenda/{fazendaId}', auth: true,
-            fields: [
-                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'nasa-ultimo': {
-            method: 'GET', title: 'Último Dado Orbital',
-            desc: 'Retorna o dado orbital mais recente de uma fazenda.',
-            path: '/api/dados-orbitais/fazenda/{fazendaId}/ultimo', auth: true,
-            fields: [
-                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'nasa-periodo': {
-            method: 'GET', title: 'Dados Orbitais por Período',
-            desc: 'Lista dados orbitais de uma fazenda em um intervalo de datas.',
-            path: '/api/dados-orbitais/fazenda/{fazendaId}/periodo', auth: true,
-            fields: [
-                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-                { id: 'inicio', label: 'Data Início (YYYY-MM-DD)', type: 'text', req: true, placeholder: '2025-05-01', default: '2025-05-01', param: true },
-                { id: 'fim', label: 'Data Fim (YYYY-MM-DD)', type: 'text', req: true, placeholder: '2025-05-29', default: '2025-05-29', param: true },
-            ]
-        },
-
-        // MARKETPLACE — LOTES
-        'mkt-criar-lote': {
-            method: 'POST', title: 'Criar Lote de Biomassa',
-            desc: 'Publica um novo lote de biomassa no marketplace.',
-            path: '/api/marketplace/lotes', auth: true,
-            fields: [
-                { id: 'idFazenda', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1' },
-                { id: 'idTanque', label: 'ID do Tanque', type: 'text', req: true, placeholder: '1', default: '1' },
-                { id: 'taxonomiaAlga', label: 'Taxonomia da Alga', type: 'text', req: true, placeholder: 'Spirulina platensis', default: 'Spirulina platensis' },
-                { id: 'pesoKg', label: 'Peso (kg)', type: 'text', req: true, placeholder: '100.0', default: '100.0' },
-                { id: 'precoUnitario', label: 'Preço Unitário (R$)', type: 'text', req: true, placeholder: '25.00', default: '25.00' },
-            ]
-        },
-        'mkt-listar-lotes': {
-            method: 'GET', title: 'Listar Lotes (Paginado)',
-            desc: 'Lista todos os lotes do marketplace com paginação.',
-            path: '/api/marketplace/lotes', auth: true,
-            fields: [
-                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
-                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
-            ]
-        },
-        'mkt-lotes-disponiveis': {
-            method: 'GET', title: 'Lotes Disponíveis',
-            desc: 'Lista todos os lotes com status disponível para compra.',
-            path: '/api/marketplace/lotes/disponiveis', auth: true,
-            fields: []
-        },
-        'mkt-buscar-lote': {
-            method: 'GET', title: 'Buscar Lote por ID',
-            desc: 'Retorna detalhes de um lote específico.',
-            path: '/api/marketplace/lotes/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'mkt-status-lote': {
-            method: 'PATCH', title: 'Atualizar Status do Lote',
-            desc: 'Altera o status de um lote (DISPONIVEL, RESERVADO, VENDIDO, CANCELADO).',
-            path: '/api/marketplace/lotes/{id}/status', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-                { id: 'status', label: 'Status', type: 'select', req: true,
-                    options: ['DISPONIVEL', 'RESERVADO', 'VENDIDO', 'CANCELADO'], default: 'DISPONIVEL' },
-            ]
-        },
-        'mkt-deletar-lote': {
-            method: 'DELETE', title: 'Remover Lote',
-            desc: 'Remove permanentemente um lote do marketplace.',
-            path: '/api/marketplace/lotes/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-
-        // MARKETPLACE — CRÉDITOS
-        'mkt-listar-creditos': {
-            method: 'GET', title: 'Listar Créditos de Carbono',
-            desc: 'Lista todos os créditos de carbono registrados.',
-            path: '/api/marketplace/creditos', auth: true,
-            fields: [
-                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
-                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
-            ]
-        },
-        'mkt-creditos-fazenda': {
-            method: 'GET', title: 'Extrato de CO₂ por Fazenda',
-            desc: 'Lista todos os créditos de carbono de uma fazenda.',
-            path: '/api/marketplace/creditos/fazenda/{fazendaId}', auth: true,
-            fields: [
-                { id: 'fazendaId', label: 'ID da Fazenda', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'mkt-buscar-credito': {
-            method: 'GET', title: 'Buscar Crédito por ID',
-            desc: 'Retorna detalhes de um crédito de carbono.',
-            path: '/api/marketplace/creditos/{id}', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Crédito', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-        'mkt-validar-credito': {
-            method: 'PATCH', title: 'Validar Crédito de Carbono',
-            desc: 'Marca um crédito de carbono como validado.',
-            path: '/api/marketplace/creditos/{id}/validar', auth: true,
-            fields: [
-                { id: 'id', label: 'ID do Crédito', type: 'text', req: true, placeholder: '1', default: '1', pathVar: true },
-            ]
-        },
-
-        // MARKETPLACE — TRANSAÇÕES
-        'mkt-criar-transacao': {
-            method: 'POST', title: 'Criar Transação',
-            desc: 'Realiza uma transação de compra de lote ou crédito de carbono.',
-            path: '/api/marketplace/transacoes', auth: true,
-            fields: [
-                { id: 'idLote', label: 'ID do Lote', type: 'text', req: true, placeholder: '1', default: '1' },
-                { id: 'idCredito', label: 'ID do Crédito (opcional)', type: 'text', placeholder: '' },
-                { id: 'tipoTransacao', label: 'Tipo de Transação', type: 'select', req: true,
-                    options: ['COMPRA_BIOMASSA', 'COMPRA_CREDITO_CARBONO', 'VENDA_BIOMASSA'], default: 'COMPRA_BIOMASSA' },
-                { id: 'quantidade', label: 'Quantidade', type: 'text', req: true, placeholder: '10.0', default: '10.0' },
-                { id: 'valorTotal', label: 'Valor Total (R$)', type: 'text', req: true, placeholder: '250.00', default: '250.00' },
-            ]
-        },
-        'mkt-listar-transacoes': {
-            method: 'GET', title: 'Listar Transações',
-            desc: 'Lista todas as transações com paginação.',
-            path: '/api/marketplace/transacoes', auth: true,
-            fields: [
-                { id: 'page', label: 'Página', type: 'text', placeholder: '0', default: '0', param: true },
-                { id: 'size', label: 'Tamanho', type: 'text', placeholder: '10', default: '10', param: true },
-            ]
-        },
-        'mkt-minhas-transacoes': {
-            method: 'GET', title: 'Minhas Transações',
-            desc: 'Lista as transações do usuário autenticado.',
-            path: '/api/marketplace/transacoes/minhas', auth: true,
-            fields: []
-        },
-    };
-
-    // ─── UI Helpers ───────────────────────────────────────────────────────────────
-    function toggleGroup(id) {
-        const el = document.getElementById(id);
-        el.classList.toggle('open');
+    function showMsg(id, type, text) {
+        const e = el(id);
+        e.textContent = text;
+        e.className = `msg ${type} visible`;
+        setTimeout(() => e.classList.remove('visible'), 5000);
     }
 
-    function notify(msg, type = 'info') {
-        const n = document.getElementById('notif');
-        n.textContent = msg;
-        n.className = `notif ${type} show`;
-        setTimeout(() => n.classList.remove('show'), 2800);
-    }
-
-    function methodClass(m) {
-        const map = { GET:'GET', POST:'POST', PUT:'PUT', DELETE:'DEL', PATCH:'PATCH' };
-        return map[m] || 'GET';
-    }
-
-    function loadEndpoint(id) {
-        currentEndpoint = id;
-        const ep = endpoints[id];
-        if (!ep) return;
-
-        // Highlight sidebar
-        document.querySelectorAll('.endpoint-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.endpoint-btn').forEach(b => {
-            if (b.getAttribute('onclick') === `loadEndpoint('${id}')`) b.classList.add('active');
-        });
-
-        // Hide welcome, show form
-        document.getElementById('welcomeScreen').style.display = 'none';
-        document.getElementById('endpointForm').style.display = 'block';
-
-        // Set method badge
-        const badge = document.getElementById('epMethodBadge');
-        badge.textContent = ep.method;
-        badge.className = 'method-badge ' + methodClass(ep.method);
-
-        document.getElementById('epTitle').textContent = ep.title;
-        document.getElementById('epDesc').textContent = ep.desc || '';
-
-        // NASA note
-        document.getElementById('nasaNote').style.display = ep.nasa ? 'block' : 'none';
-
-        // URL display
-        const base = document.getElementById('baseUrl').value.replace(/\/$/, '');
-        document.getElementById('urlDisplay').innerHTML =
-            `<strong>${ep.method}</strong> ${base}<span style="color:var(--accent)">${ep.path}</span>`;
-
-        // Render fields
-        const container = document.getElementById('fieldsContainer');
-        container.innerHTML = '';
-
-        const pathFields = ep.fields.filter(f => f.pathVar);
-        const bodyFields = ep.fields.filter(f => !f.pathVar && !f.param);
-        const paramFields = ep.fields.filter(f => f.param);
-
-        if (pathFields.length) {
-            container.innerHTML += `<div class="section-label" style="margin-bottom:12px;">Path Variables</div>`;
-            container.innerHTML += renderFieldsGrid(pathFields);
-        }
-        if (bodyFields.length) {
-            const isGet = ['GET', 'DELETE'].includes(ep.method);
-            if (!isGet) {
-                container.innerHTML += `<div class="section-label" style="margin-bottom:12px;margin-top:${pathFields.length?16:0}px;">Request Body</div>`;
-                container.innerHTML += renderFieldsGrid(bodyFields);
-            }
-        }
-        if (paramFields.length) {
-            container.innerHTML += `<div class="section-label" style="margin-bottom:12px;margin-top:${(pathFields.length||bodyFields.length)?16:0}px;">Query Params</div>`;
-            container.innerHTML += renderFieldsGrid(paramFields);
-        }
-
-        // Clear response
-        clearResponse();
-    }
-
-    function renderFieldsGrid(fields) {
-        let html = '<div class="fields-grid">';
-        fields.forEach(f => {
-            html += `<div class="field">`;
-            html += `<label>${f.label}${f.req ? ' <span class="req">*</span>' : ''}</label>`;
-            if (f.type === 'select') {
-                html += `<select id="field_${f.id}">`;
-                (f.options || []).forEach(o => {
-                    html += `<option value="${o}" ${o === (f.default||'') ? 'selected' : ''}>${o || '— selecione —'}</option>`;
-                });
-                html += `</select>`;
-            } else {
-                html += `<input type="${f.type||'text'}" id="field_${f.id}"
-        placeholder="${f.placeholder||''}"
-        value="${f.default||''}">`;
-            }
-            html += `</div>`;
-        });
-        html += '</div>';
-        return html;
-    }
-
-    // ─── Request execution ────────────────────────────────────────────────────────
-    async function sendRequest() {
-        const ep = endpoints[currentEndpoint];
-        if (!ep) return;
-
-        const btn = document.getElementById('sendBtn');
-        btn.classList.add('loading');
-        btn.disabled = true;
-
-        const base = document.getElementById('baseUrl').value.replace(/\/$/, '');
-        const token = document.getElementById('jwtToken').value.trim();
-
-        // Build URL
-        let path = ep.path;
-        const queryParams = [];
-        const bodyObj = {};
-
-        ep.fields.forEach(f => {
-            const el = document.getElementById('field_' + f.id);
-            if (!el) return;
-            const val = el.value.trim();
-
-            if (f.pathVar) {
-                path = path.replace(`{${f.id}}`, val || `{${f.id}}`);
-            } else if (f.param) {
-                if (val) queryParams.push(`${encodeURIComponent(f.id)}=${encodeURIComponent(val)}`);
-            } else {
-                if (val) bodyObj[f.id] = isNaN(val) ? val : (val.includes('.') ? parseFloat(val) : (val === 'true' ? true : val === 'false' ? false : val));
-            }
-        });
-
-        let url = base + path;
-        if (queryParams.length) url += '?' + queryParams.join('&');
-
-        // Update URL display live
-        document.getElementById('urlDisplay').innerHTML =
-            `<strong>${ep.method}</strong> <span style="color:var(--accent)">${url}</span>`;
-
-        const headers = { 'Content-Type': 'application/json' };
-        if (ep.auth && token) headers['Authorization'] = 'Bearer ' + token;
-
-        const options = { method: ep.method, headers };
-        if (!['GET','DELETE'].includes(ep.method) && Object.keys(bodyObj).length > 0) {
-            options.body = JSON.stringify(bodyObj);
-        }
-
-        const t0 = performance.now();
-
+    async function doRegister() {
+        BASE = el('authBase').value.replace(/\/$/,'');
+        const body = {
+            nome:       v('regNome'),
+            email:      v('regEmail'),
+            senha:      v('regPass'),
+            telefone:   v('regTelefone') || undefined,
+            nomePerfil: v('regNomePerfil')          // ← campo correto
+        };
         try {
-            const resp = await fetch(url, options);
-            const elapsed = Math.round(performance.now() - t0);
-
-            let text = await resp.text();
-            let parsed = null;
-            try { parsed = JSON.parse(text); } catch(e) {}
-
-            // Auto-extract token from login response
-            if (currentEndpoint === 'auth-login' && parsed && parsed.token) {
-                document.getElementById('jwtToken').value = parsed.token;
-                document.getElementById('tokenStatus').className = 'token-status has-token';
-                document.getElementById('tokenStatus').textContent = '✓ Token ativo';
-                notify('Token JWT salvo automaticamente!', 'success');
-            }
-
-            showResponse(resp.status, parsed || text, elapsed);
-        } catch (err) {
-            showResponse(0, { error: err.message, tip: 'Verifique se a API está rodando e o CORS está habilitado.' }, 0);
-            notify('Falha na conexão — verifique a Base URL', 'error');
-        } finally {
-            btn.classList.remove('loading');
-            btn.disabled = false;
-        }
-    }
-
-    function showResponse(status, data, ms) {
-        const badge = document.getElementById('statusBadge');
-        const timeEl = document.getElementById('responseTime');
-        const body = document.getElementById('responseBody');
-
-        badge.textContent = status || 'Erro';
-        badge.className = 'status-badge show ' +
-            (status >= 200 && status < 300 ? 'status-2xx' : status >= 400 && status < 500 ? 'status-4xx' : status >= 500 ? 'status-5xx' : 'status-4xx');
-
-        if (ms) {
-            timeEl.textContent = `${ms} ms`;
-            timeEl.className = 'response-time show';
-        }
-
-        body.innerHTML = `<pre>${colorizeJSON(typeof data === 'string' ? data : JSON.stringify(data, null, 2))}</pre>`;
-    }
-
-    function clearResponse() {
-        document.getElementById('statusBadge').className = 'status-badge';
-        document.getElementById('responseTime').className = 'response-time';
-        document.getElementById('responseBody').innerHTML = `
-    <div class="response-placeholder">
-      <div class="big-icon">◉</div>
-      <span>Aguardando requisição...</span>
-    </div>`;
-    }
-
-    function copyResponse() {
-        const pre = document.querySelector('#responseBody pre');
-        if (!pre) return;
-        navigator.clipboard.writeText(pre.textContent).then(() => notify('JSON copiado!', 'success'));
-    }
-
-    // ─── JSON syntax highlighting ─────────────────────────────────────────────────
-    function colorizeJSON(str) {
-        return str
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
-                if (/^"/.test(match)) {
-                    return /:$/.test(match)
-                        ? `<span class="json-key">${match}</span>`
-                        : `<span class="json-string">${match}</span>`;
-                }
-                if (/true|false/.test(match)) return `<span class="json-bool">${match}</span>`;
-                if (/null/.test(match)) return `<span class="json-null">${match}</span>`;
-                return `<span class="json-number">${match}</span>`;
+            const r = await fetch(`${BASE}/api/auth/register`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
             });
+            const d = await r.json();
+            if (r.ok) showMsg('registerMsg', 'success', '✓ Conta criada! Agora faça o login.');
+            else showMsg('registerMsg', 'error', fmtErr(d));
+        } catch(e) { showMsg('registerMsg', 'error', 'Erro de conexão: ' + e.message); }
     }
 
-    // ─── Update URL display on baseUrl change ─────────────────────────────────────
-    document.getElementById('baseUrl').addEventListener('input', () => {
-        if (currentEndpoint) loadEndpoint(currentEndpoint);
-    });
+    async function doLogin() {
+        BASE = el('authBase').value.replace(/\/$/,'');
+        const body = { email: v('loginEmail'), senha: v('loginPass') };
+        try {
+            const r = await fetch(`${BASE}/api/auth/login`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok && (d.token || d.accessToken)) {
+                JWT = d.token || d.accessToken;
+                el('userNameBadge').textContent = d.email || v('loginEmail');
+                el('userRoleBadge').textContent = d.perfil ? `[${d.perfil}]` : '';
+                el('appBase').value = BASE;
+                el('authScreen').style.display = 'none';
+                el('appScreen').style.display  = 'flex';
+                updateTokenDisplay();
+            } else {
+                showMsg('loginMsg', 'error', fmtErr(d));
+            }
+        } catch(e) { showMsg('loginMsg', 'error', 'Erro de conexão: ' + e.message); }
+    }
+
+    // in-app login (salva token sem sair da tela)
+    async function reqLogin() {
+        BASE = (el('appBase')?.value || BASE).replace(/\/$/,'');
+        const body = { email: v('al_email'), senha: v('al_senha') };
+        const t0 = performance.now();
+        try {
+            const r = await fetch(`${BASE}/api/auth/login`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok && (d.token || d.accessToken)) {
+                JWT = d.token || d.accessToken;
+                el('userNameBadge').textContent = d.email || v('al_email');
+                el('userRoleBadge').textContent = d.perfil ? `[${d.perfil}]` : '';
+                updateTokenDisplay();
+            }
+            showRes('res_al', r.status, JSON.stringify(d, null, 2), t0);
+        } catch(e) { showRes('res_al', 0, 'Erro: ' + e.message, t0); }
+    }
+
+    function doLogout() {
+        JWT = '';
+        el('authScreen').style.display = 'flex';
+        el('appScreen').style.display  = 'none';
+    }
+
+    function updateTokenDisplay() {
+        const td = el('tokenDisplay');
+        if (JWT) {
+            td.textContent = JWT;
+            td.classList.add('has-token');
+        } else {
+            td.textContent = 'Nenhum token salvo — faça o login acima.';
+            td.classList.remove('has-token');
+        }
+    }
+    function copyToken() { if (JWT) navigator.clipboard.writeText(JWT).then(() => {}); }
+    function clearToken() { JWT = ''; updateTokenDisplay(); }
+
+    // ── generic request ──
+    async function req(method, path, body, resId, auth = true) {
+        const base = (el('appBase')?.value || BASE).replace(/\/$/,'');
+        const headers = { 'Content-Type': 'application/json' };
+        if (auth && JWT) headers['Authorization'] = `Bearer ${JWT}`;
+        const opts = { method, headers };
+        if (body && method !== 'GET' && method !== 'DELETE') {
+            // Remove apenas undefined — null e '' são valores legítimos
+            const cleaned = Object.fromEntries(Object.entries(body).filter(([,val]) => val !== undefined));
+            opts.body = JSON.stringify(cleaned);
+        }
+        const t0 = performance.now();
+        try {
+            const r   = await fetch(base + path, opts);
+            const ct  = r.headers.get('content-type') || '';
+            let txt;
+            if (ct.includes('json')) { const d = await r.json(); txt = JSON.stringify(d, null, 2); }
+            else txt = await r.text();
+            showRes(resId, r.status, txt || '(sem conteúdo)', t0);
+            if (r.status === 401)
+                el(resId).insertAdjacentHTML('beforeend',
+                    '<div style="font-size:10px;color:var(--amber);margin-top:6px;font-family:var(--mono)">⚠ 401 — Token ausente, expirado ou sem permissão para esta rota</div>');
+        } catch(e) {
+            showRes(resId, 0,
+                `Erro de conexão: ${e.message}\n\n→ Verifique se a API está rodando em ${base}\n→ Confirme que o CORS está habilitado no backend`, t0);
+        }
+    }
+
+    function fmtErr(d) {
+        if (!d) return 'Erro desconhecido';
+        if (d.fields) return 'Validation Error → ' + Object.entries(d.fields).map(([k,v]) => `${k}: ${v}`).join(' | ');
+        return d.message || d.error || JSON.stringify(d);
+    }
+
+    function showRes(id, status, text, t0) {
+        const ms = Math.round(performance.now() - t0);
+        let cls = 's0';
+        if (status >= 200 && status < 300) cls = 's2xx';
+        else if (status >= 400 && status < 500) cls = 's4xx';
+        else if (status >= 500) cls = 's5xx';
+        const label = status === 0 ? 'ERR' : String(status);
+        el(id).innerHTML = `
+<div class="res-box">
+  <div class="res-head">
+    <span class="res-status ${cls}">${label}</span>
+    <span class="res-time">${ms}ms</span>
+    <button class="res-copy" onclick="navigator.clipboard.writeText(this.closest('.res-box').querySelector('pre').textContent)">copiar</button>
+  </div>
+  <pre class="res-body">${syntaxHL(text)}</pre>
+</div>`;
+    }
+
+    function syntaxHL(json) {
+        const s = json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return s.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+            let c = 'jn';
+            if (/^"/.test(m)) c = /:$/.test(m) ? 'jk' : 'js';
+            else if (/true|false/.test(m)) c = 'jb';
+            else if (/null/.test(m)) c = 'je';
+            return `<span class="${c}">${m}</span>`;
+        });
+    }
+
+    function goPage(name) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        el('page-' + name)?.classList.add('active');
+        document.querySelector(`[data-page="${name}"]`)?.classList.add('active');
+    }
 </script>
 </body>
 </html>
-
-
-
-
-
