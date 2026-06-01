@@ -47,15 +47,18 @@ public class TanqueService {
         return toResponse(tanqueRepository.save(tanque));
     }
 
+    @Transactional(readOnly = true)
     public Page<TanqueResponse> listarTodos(Pageable pageable) {
         return tanqueRepository.findAll(pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public List<TanqueResponse> listarPorFazenda(Long fazendaId) {
         return tanqueRepository.findByFazendaId(fazendaId)
                 .stream().map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public TanqueResponse buscarPorId(Long id) {
         return toResponse(buscarEntidade(id));
     }

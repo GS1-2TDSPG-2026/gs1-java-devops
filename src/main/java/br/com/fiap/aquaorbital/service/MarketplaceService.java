@@ -29,8 +29,6 @@ public class MarketplaceService {
     private final TanqueRepository tanqueRepository;
     private final UsuarioRepository usuarioRepository;
 
-
-
     @Transactional
     public LoteBiomassaResponse criarLote(CriarLoteRequest request) {
         Fazenda fazenda = fazendaRepository.findById(request.idFazenda())
@@ -49,15 +47,18 @@ public class MarketplaceService {
         return toLoteResponse(loteRepository.save(lote));
     }
 
+    @Transactional(readOnly = true)
     public Page<LoteBiomassaResponse> listarLotes(Pageable pageable) {
         return loteRepository.findAll(pageable).map(this::toLoteResponse);
     }
 
+    @Transactional(readOnly = true)
     public List<LoteBiomassaResponse> listarLotesDisponiveis() {
         return loteRepository.findByStatus("DISPONIVEL")
                 .stream().map(this::toLoteResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public LoteBiomassaResponse buscarLote(Long id) {
         return toLoteResponse(buscarLoteEntidade(id));
     }
@@ -81,17 +82,18 @@ public class MarketplaceService {
         loteRepository.deleteById(id);
     }
 
-
-
+    @Transactional(readOnly = true)
     public Page<CreditoCarbonoResponse> listarCreditos(Pageable pageable) {
         return creditoRepository.findAll(pageable).map(this::toCreditoResponse);
     }
 
+    @Transactional(readOnly = true)
     public List<CreditoCarbonoResponse> listarCreditosPorFazenda(Long fazendaId) {
         return creditoRepository.findByFazendaId(fazendaId)
                 .stream().map(this::toCreditoResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public CreditoCarbonoResponse buscarCredito(Long id) {
         return toCreditoResponse(buscarCreditoEntidade(id));
     }
@@ -103,8 +105,6 @@ public class MarketplaceService {
         credito.setDtValidacao(LocalDateTime.now());
         return toCreditoResponse(creditoRepository.save(credito));
     }
-
-
 
     @Transactional
     public TransacaoResponse criarTransacao(CriarTransacaoRequest request, Long usuarioId) {
@@ -141,22 +141,22 @@ public class MarketplaceService {
                 .tipoTransacao(request.tipoTransacao())
                 .quantidade(request.quantidade())
                 .valorTotal(request.valorTotal())
-                .status("CONFIRMADA") // corrigido: era "CONCLUIDA", divergia do padrao do banco
+                .status("CONFIRMADA")
                 .build();
 
         return toTransacaoResponse(transacaoRepository.save(transacao));
     }
 
+    @Transactional(readOnly = true)
     public Page<TransacaoResponse> listarTransacoes(Pageable pageable) {
         return transacaoRepository.findAll(pageable).map(this::toTransacaoResponse);
     }
 
+    @Transactional(readOnly = true)
     public List<TransacaoResponse> listarTransacoesPorUsuario(Long usuarioId) {
         return transacaoRepository.findByUsuarioCompradorId(usuarioId)
                 .stream().map(this::toTransacaoResponse).toList();
     }
-
-
 
     public static String gerarHash(String input) {
         try {
