@@ -5,7 +5,6 @@ import br.com.fiap.aquaorbital.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -37,6 +36,8 @@ public class SecurityConfig {
     }
 
     private static final String[] PUBLIC_URLS = {
+            "/",
+            "/index.html",
             "/api/auth/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
@@ -53,10 +54,6 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_URLS).permitAll()
-                        .requestMatchers("/api/perfis/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
-                        .requestMatchers("/api/marketplace/**").hasAnyRole("INVESTIDOR", "COMPRADOR_B2B", "ADMIN")
-                        .requestMatchers("/api/creditos/**").hasAnyRole("INVESTIDOR", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
