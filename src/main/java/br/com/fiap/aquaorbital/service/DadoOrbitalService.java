@@ -17,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,11 +33,10 @@ public class DadoOrbitalService {
 
     private static final String NASA_POWER_URL = "https://power.larc.nasa.gov/api/temporal/daily/point";
     private static final String FONTE = "NASA_POWER";
-
-    // NASA POWER tem delay de ~7 dias — busca o mês anterior completo
-    // para garantir dados reais disponíveis sem valores -999
-    private static final int DIAS_DELAY_NASA = 7;
-    private static final int JANELA_DIAS = 30;
+    private static final DateTimeFormatter NASA_FMT = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final double NASA_MISSING = -999.0;
+    private static final int NASA_LAG_DAYS = 5;
+    private static final int NASA_WINDOW_DAYS = 13;
 
     @Transactional
     public List<DadoOrbitalResponse> buscarEsalvarDadosNasa(Long fazendaId) {
@@ -44,22 +44,17 @@ public class DadoOrbitalService {
                 .orElseThrow(() -> new EntityNotFoundException("Fazenda não encontrada: " + fazendaId));
 
         if (fazenda.getLatitude() == null || fazenda.getLongitude() == null) {
-            throw new IllegalArgumentException(
-                    "Fazenda sem coordenadas geográficas. Atualize latitude e longitude antes de sincronizar.");
+            throw new IllegalArgumentException("Fazenda não possui coordenadas geográficas cadastradas");
         }
 
-        // Ajusta o período para o delay da NASA:
-        // fim  = hoje - 7 dias (último dia com dado garantido)
-        // início = fim - 30 dias (janela de 30 dias de dados reais)
-        LocalDate fim = LocalDate.now().minusDays(DIAS_DELAY_NASA);
-        LocalDate inicio = fim.minusDays(JANELA_DIAS - 1);
+        LocalDate fim    = LocalDate.now().minusDays(NASA_LAG_DAYS);
+        LocalDate inicio = fim.minusDays(NASA_WINDOW_DAYS);
 
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
-        String start = inicio.format(fmt);
-        String end   = fim.format(fmt);
+        String start = inicio.format(NASA_FMT);
+        String end   = fim.format(NASA_FMT);
 
         String url = UriComponentsBuilder.fromUriString(NASA_POWER_URL)
-                .queryParam("parameters", "ALLSKY_SFC_PAR_TOT,T2M,CLOUD_AMT")
+                .queryParam("parameters", "ALLSKY_SFC_SW_DWN,T2M,CLOUD_AMT")
                 .queryParam("community", "AG")
                 .queryParam("longitude", fazenda.getLongitude().toPlainString())
                 .queryParam("latitude",  fazenda.getLatitude().toPlainString())
@@ -68,87 +63,90 @@ public class DadoOrbitalService {
                 .queryParam("format", "JSON")
                 .toUriString();
 
-        log.info("Chamando NASA POWER | fazenda={} | período={} → {} | url={}",
+        log.info("Chamando NASA POWER API | fazenda={} | período={} → {} | URL: {}",
                 fazendaId, start, end, url);
 
         NasaPowerDTOs nasaResponse = restTemplate.getForObject(url, NasaPowerDTOs.class);
 
         if (nasaResponse == null || nasaResponse.properties() == null) {
-            throw new RuntimeException(
-                    "NASA POWER API não retornou dados. Verifique as coordenadas da fazenda.");
+            log.error("NASA POWER retornou resposta nula ou sem 'properties'. URL chamada: {}", url);
+            throw new RuntimeException("NASA POWER API não retornou dados para as coordenadas informadas");
         }
 
         Map<String, Map<String, Double>> parametros = nasaResponse.properties().parameter();
 
-        if (parametros == null || !parametros.containsKey("ALLSKY_SFC_PAR_TOT")) {
-            throw new RuntimeException(
-                    "Resposta da NASA POWER não contém o parâmetro ALLSKY_SFC_PAR_TOT esperado.");
+        if (parametros == null || parametros.isEmpty()) {
+            log.warn("NASA POWER retornou 'parameter' vazio para fazenda={} no período {}-{}.",
+                    fazendaId, start, end);
+            return dadoOrbitalRepository
+                    .findByFazendaIdOrderByDtColetaDesc(fazendaId)
+                    .stream()
+                    .map(this::toResponse)
+                    .toList();
         }
 
-        Map<String, Double> par   = parametros.get("ALLSKY_SFC_PAR_TOT");
-        Map<String, Double> temp  = parametros.get("T2M");
-        Map<String, Double> cloud = parametros.get("CLOUD_AMT");
+        log.info("NASA POWER parâmetros recebidos: {}", parametros.keySet());
 
-        int[] contadores = {0, 0}; // [salvos, pulados]
+        Map<String, Double> par   = parametros.getOrDefault("ALLSKY_SFC_SW_DWN", Collections.emptyMap());
+        Map<String, Double> temp  = parametros.getOrDefault("T2M",               Collections.emptyMap());
+        Map<String, Double> cloud = parametros.getOrDefault("CLOUD_AMT",          Collections.emptyMap());
+
+        if (par.isEmpty()) {
+            log.warn("Parâmetro ALLSKY_SFC_SW_DWN ausente na resposta da NASA para fazenda={}", fazendaId);
+        }
 
         par.forEach((dataStr, valorPar) -> {
-            // Ignora chave "ANN" (média anual) e outras não-datas que a NASA inclui
-            if (dataStr.length() != 8) return;
+            if (valorPar == null || Double.compare(valorPar, NASA_MISSING) == 0) {
+                log.debug("Dado SW_DWN ausente (missing={}) para data={}, pulando.", NASA_MISSING, dataStr);
+                return;
+            }
 
             LocalDate data;
             try {
-                data = LocalDate.parse(dataStr, fmt);
+                data = LocalDate.parse(dataStr, NASA_FMT);
             } catch (Exception e) {
-                log.warn("Data inválida retornada pela NASA: {}", dataStr);
+                log.warn("Data inválida recebida da NASA: '{}', pulando.", dataStr);
                 return;
             }
 
-            // Pula dados inválidos (-999 = sem cobertura de satélite)
-            if (valorPar == null || valorPar <= -998.0) {
-                contadores[1]++;
-                return;
-            }
-
-            // Não duplica registros já existentes
-            Optional<DadoOrbital> existente =
-                    dadoOrbitalRepository.findByFazendaIdAndDtColeta(fazendaId, data);
+            Optional<DadoOrbital> existente = dadoOrbitalRepository.findByFazendaIdAndDtColeta(fazendaId, data);
             if (existente.isPresent()) {
-                contadores[1]++;
+                log.debug("Dado para fazenda={} data={} já existe, ignorando duplicata.", fazendaId, data);
                 return;
             }
 
-            Double valorTemp  = (temp  != null) ? temp.get(dataStr)  : null;
-            Double valorCloud = (cloud != null) ? cloud.get(dataStr) : null;
+            Double valorTemp  = temp.get(dataStr);
+            Double valorCloud = cloud.get(dataStr);
 
             DadoOrbital dado = DadoOrbital.builder()
                     .fazenda(fazenda)
                     .fonte(FONTE)
                     .dtColeta(data)
                     .irradianciaParTot(BigDecimal.valueOf(valorPar))
-                    .temperaturaAmbiente(
-                            (valorTemp != null && valorTemp > -998.0)
-                                    ? BigDecimal.valueOf(valorTemp) : null)
-                    .nebulosidade(
-                            (valorCloud != null && valorCloud > -998.0)
-                                    ? BigDecimal.valueOf(valorCloud) : null)
+                    .temperaturaAmbiente(valorTemp  != null && Double.compare(valorTemp,  NASA_MISSING) != 0
+                            ? BigDecimal.valueOf(valorTemp)  : null)
+                    .nebulosidade(valorCloud != null && Double.compare(valorCloud, NASA_MISSING) != 0
+                            ? BigDecimal.valueOf(valorCloud) : null)
                     .latitude(fazenda.getLatitude())
                     .longitude(fazenda.getLongitude())
                     .build();
 
             dadoOrbitalRepository.save(dado);
-            contadores[0]++;
+            log.debug("Salvo dado orbital | fazenda={} | data={} | SW_DWN={} | T2M={} | CLOUD={}",
+                    fazendaId, data, valorPar, valorTemp, valorCloud);
         });
 
-        log.info("NASA POWER sincronizado | fazenda={} | salvos={} | pulados/duplicados={}",
-                fazendaId, contadores[0], contadores[1]);
-
-        return dadoOrbitalRepository
+        List<DadoOrbitalResponse> resultado = dadoOrbitalRepository
                 .findByFazendaIdOrderByDtColetaDesc(fazendaId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
+
+        log.info("Sincronização concluída | fazenda={} | {} registros no banco.", fazendaId, resultado.size());
+        return resultado;
     }
 
+    @Transactional(readOnly = true)
     public List<DadoOrbitalResponse> listarPorFazenda(Long fazendaId) {
         if (!fazendaRepository.existsById(fazendaId)) {
             throw new EntityNotFoundException("Fazenda não encontrada: " + fazendaId);
@@ -160,6 +158,7 @@ public class DadoOrbitalService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<DadoOrbitalResponse> listarPorPeriodo(Long fazendaId, LocalDate inicio, LocalDate fim) {
         if (!fazendaRepository.existsById(fazendaId)) {
             throw new EntityNotFoundException("Fazenda não encontrada: " + fazendaId);
@@ -171,6 +170,7 @@ public class DadoOrbitalService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public DadoOrbitalResponse buscarUltimo(Long fazendaId) {
         return dadoOrbitalRepository
                 .findTopByFazendaIdOrderByDtColetaDesc(fazendaId)
