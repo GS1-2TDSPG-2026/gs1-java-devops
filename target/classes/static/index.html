@@ -3,306 +3,420 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaOrbital — Sistema</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>AquaOrbital — API Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         :root{
-            --bg:#080d12;--surface:#0e1520;--surface2:#141e2e;--surface3:#1a2538;
-            --border:#1e2d42;--border2:#243348;
-            --cyan:#00d4ff;--cyan-dim:rgba(0,212,255,.12);--cyan-glow:rgba(0,212,255,.3);
-            --green:#00e5a0;--green-dim:rgba(0,229,160,.1);
-            --amber:#ffb800;--amber-dim:rgba(255,184,0,.1);
-            --red:#ff4466;--red-dim:rgba(255,68,102,.1);
-            --blue:#4d9fff;--blue-dim:rgba(77,159,255,.1);
-            --text:#e2eaf5;--text2:#7a93b4;--text3:#3d5270;
-            --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
-            --r:6px;--r2:10px;
+            --bg:#050810;--s1:#080d18;--s2:#0c1220;--s3:#101828;--s4:#14202e;
+            --b1:#162030;--b2:#1c2a3c;--b3:#243548;
+            --cyan:#00e5ff;--cyan2:#00b8d4;--cyan-a:rgba(0,229,255,.1);--cyan-g:rgba(0,229,255,.25);
+            --mint:#00ffb3;--mint-a:rgba(0,255,179,.08);
+            --violet:#b388ff;--violet-a:rgba(179,136,255,.1);
+            --amber:#ffcc02;--amber-a:rgba(255,204,2,.1);
+            --rose:#ff4d6d;--rose-a:rgba(255,77,109,.1);
+            --blue:#4db8ff;--blue-a:rgba(77,184,255,.1);
+            --text:#d4e4f7;--text2:#7a9ab8;--text3:#3d5a78;--text4:#1e3a56;
+            --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+            --r:5px;--r2:8px;--r3:12px;
         }
-        body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;overflow-x:hidden}
-        ::-webkit-scrollbar{width:5px;height:5px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-        body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.3;pointer-events:none;z-index:0}
+        html{scroll-behavior:smooth}
+        body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:13px}
+
+        /* ── SCANLINE BG ── */
+        body::before{content:'';position:fixed;inset:0;
+            background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.012) 2px,rgba(0,229,255,.012) 4px);
+            pointer-events:none;z-index:0}
+        body::after{content:'';position:fixed;inset:0;
+            background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,229,255,.06),transparent);
+            pointer-events:none;z-index:0}
 
         /* ── AUTH ── */
-        #authScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;position:relative;z-index:1}
-        #authScreen::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(0,212,255,.08),transparent 70%);pointer-events:none}
-        .auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:36px;width:100%;max-width:440px;position:relative;box-shadow:0 0 60px rgba(0,0,0,.6)}
-        .auth-card::before{content:'';position:absolute;inset:-1px;border-radius:15px;background:linear-gradient(135deg,rgba(0,212,255,.15),transparent 50%,rgba(0,229,160,.08));pointer-events:none;z-index:-1}
-        .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-        .auth-logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px var(--cyan-glow)}
-        .auth-logo-text{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-1px}
-        .auth-logo-text em{color:var(--cyan);font-style:normal}
-        .auth-subtitle{font-size:12px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
-        .auth-tabs{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);margin-bottom:24px;padding:3px;gap:3px}
-        .auth-tab{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;font-family:var(--mono);color:var(--text3);background:none;border:none;cursor:pointer;border-radius:5px;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
-        .auth-tab.active{background:var(--surface2);color:var(--cyan);box-shadow:inset 0 0 0 1px var(--border2)}
-        .fgroup{margin-bottom:14px}
-        .fgroup label{display:block;font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono)}
-        .fgroup input,.fgroup select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:var(--r);outline:none;font-size:13px;transition:border-color .2s;font-family:var(--sans)}
-        .fgroup input:focus,.fgroup select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
-        .fgroup select option{background:var(--surface)}
-        .frow{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-bottom:14px}
-        .frow .fgroup{margin-bottom:0}
-        .btn-primary{width:100%;background:linear-gradient(135deg,var(--cyan),#0099cc);color:#000;border:none;padding:11px;border-radius:var(--r);font-weight:700;font-size:13px;font-family:var(--mono);cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;box-shadow:0 0 20px rgba(0,212,255,.2)}
-        .btn-primary:hover{box-shadow:0 0 30px rgba(0,212,255,.4);transform:translateY(-1px)}
-        .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
-        .msg{padding:10px 14px;border-radius:var(--r);font-size:12px;margin-bottom:14px;display:none;font-family:var(--mono)}
-        .msg.success{background:var(--green-dim);border:1px solid rgba(0,229,160,.3);color:var(--green)}
-        .msg.error{background:var(--red-dim);border:1px solid rgba(255,68,102,.3);color:var(--red)}
-        .msg.visible{display:block}
+        #authScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:200;background:var(--bg)}
+        .auth-wrap{position:relative;width:100%;max-width:460px;padding:20px}
+        .auth-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:200px;
+            background:radial-gradient(ellipse,rgba(0,229,255,.12),transparent 70%);pointer-events:none}
+        .auth-card{background:var(--s2);border:1px solid var(--b2);border-radius:16px;padding:36px 40px;
+            position:relative;overflow:hidden}
+        .auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+            background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+        .auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:30px}
+        .auth-logo-mark{width:44px;height:44px;border-radius:10px;
+            background:linear-gradient(135deg,var(--cyan),var(--mint));
+            display:flex;align-items:center;justify-content:center;font-size:22px;
+            box-shadow:0 0 24px rgba(0,229,255,.4),0 0 48px rgba(0,229,255,.15)}
+        .auth-logo-text{font-family:var(--sans);font-size:22px;font-weight:800;letter-spacing:-1px;color:var(--text)}
+        .auth-logo-text span{color:var(--cyan)}
+        .auth-logo-sub{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+        .auth-tabs{display:flex;background:var(--bg);border:1px solid var(--b1);border-radius:var(--r);padding:3px;gap:3px;margin-bottom:22px}
+        .atab{flex:1;padding:8px;text-align:center;font-family:var(--mono);font-size:11px;font-weight:700;
+            color:var(--text3);background:none;border:none;cursor:pointer;border-radius:4px;
+            transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
+        .atab.active{background:var(--s3);color:var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.15)}
+        .fg{margin-bottom:14px}
+        .fg label{display:block;font-family:var(--mono);font-size:9px;font-weight:700;color:var(--text3);
+            text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+        .fg input,.fg select{width:100%;background:var(--bg);border:1px solid var(--b2);color:var(--text);
+            padding:9px 12px;border-radius:var(--r);font-family:var(--mono);font-size:12px;outline:none;
+            transition:all .2s}
+        .fg input:focus,.fg select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-a)}
+        .fg select option{background:var(--s2)}
+        .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+        .frow .fg{margin-bottom:0}
+        .btn-auth{width:100%;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#000;
+            border:none;padding:11px;border-radius:var(--r);font-family:var(--mono);font-size:12px;
+            font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;
+            box-shadow:0 0 20px rgba(0,229,255,.2)}
+        .btn-auth:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(0,229,255,.4)}
+        .auth-msg{padding:9px 12px;border-radius:var(--r);font-family:var(--mono);font-size:11px;
+            margin-bottom:12px;display:none}
+        .auth-msg.ok{background:var(--mint-a);border:1px solid rgba(0,255,179,.25);color:var(--mint);display:block}
+        .auth-msg.err{background:var(--rose-a);border:1px solid rgba(255,77,109,.25);color:var(--rose);display:block}
 
         /* ── APP ── */
-        #appScreen{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1}
-        .topbar{display:flex;align-items:center;gap:16px;padding:0 24px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
-        .topbar-logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:-1px;white-space:nowrap}
-        .topbar-logo-icon{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:14px}
-        .topbar-logo em{color:var(--cyan);font-style:normal}
-        .topbar-url{display:flex;align-items:center;gap:8px;margin-left:auto}
-        .topbar-url label{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-        .topbar-url input{background:var(--bg);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:var(--r);font-family:var(--mono);font-size:11px;width:230px;outline:none;transition:border-color .2s}
-        .topbar-url input:focus{border-color:var(--cyan);color:var(--text)}
-        .user-badge{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:5px 14px;white-space:nowrap}
-        .user-badge span{font-size:11px;color:var(--text3);font-family:var(--mono)}
-        .user-badge strong{font-size:11px;color:var(--cyan);font-family:var(--mono)}
-        .btn-logout{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 12px;border-radius:var(--r);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;white-space:nowrap}
-        .btn-logout:hover{border-color:var(--red);color:var(--red)}
-        .layout{display:flex;flex:1}
-        nav{width:210px;min-width:210px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
-        .nav-section{padding:14px 16px 5px;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-family:var(--mono)}
-        .nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;color:var(--text2);font-size:12px;font-weight:500;transition:all .15s;border-left:2px solid transparent;font-family:var(--mono)}
-        .nav-item:hover{background:var(--surface2);color:var(--text)}
-        .nav-item.active{background:rgba(0,212,255,.06);color:var(--cyan);border-left-color:var(--cyan)}
-        .nav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-        .content{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column}
-        .page{display:none}
-        .page.active{display:flex;flex-direction:column;gap:20px}
-        .page-title{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;letter-spacing:-.5px}
-        .page-title-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
+        #app{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1}
+
+        /* ── TOPBAR ── */
+        .topbar{height:52px;background:rgba(8,13,24,.95);border-bottom:1px solid var(--b2);
+            display:flex;align-items:center;gap:14px;padding:0 20px;position:sticky;top:0;z-index:100;
+            backdrop-filter:blur(12px)}
+        .topbar-logo{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-weight:800;
+            font-size:16px;letter-spacing:-.5px;white-space:nowrap}
+        .topbar-mark{width:28px;height:28px;border-radius:7px;
+            background:linear-gradient(135deg,var(--cyan),var(--mint));
+            display:flex;align-items:center;justify-content:center;font-size:13px;
+            box-shadow:0 0 12px rgba(0,229,255,.3)}
+        .topbar-logo span{color:var(--cyan)}
+        .topbar-sep{width:1px;height:24px;background:var(--b2);margin:0 4px}
+        .url-wrap{display:flex;align-items:center;gap:8px}
+        .url-wrap label{font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+        .url-wrap input{background:var(--bg);border:1px solid var(--b1);color:var(--text2);
+            padding:4px 10px;border-radius:var(--r);font-family:var(--mono);font-size:11px;
+            width:220px;outline:none;transition:border-color .2s}
+        .url-wrap input:focus{border-color:var(--cyan);color:var(--text)}
+        .user-chip{display:flex;align-items:center;gap:8px;background:var(--s2);
+            border:1px solid var(--b2);border-radius:20px;padding:4px 14px;margin-left:auto}
+        .user-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);
+            box-shadow:0 0 6px var(--mint);animation:blink 2s infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+        .user-chip span{font-family:var(--mono);font-size:10px;color:var(--text3)}
+        .user-chip strong{font-family:var(--mono);font-size:10px;color:var(--cyan)}
+        .user-chip em{font-family:var(--mono);font-size:10px;color:var(--mint);font-style:normal}
+        .btn-out{background:none;border:1px solid var(--b2);color:var(--text3);padding:4px 12px;
+            border-radius:var(--r);font-family:var(--mono);font-size:10px;cursor:pointer;
+            transition:all .15s;white-space:nowrap;text-transform:uppercase}
+        .btn-out:hover{border-color:var(--rose);color:var(--rose)}
+
+        /* ── LAYOUT ── */
+        .layout{display:flex;flex:1;min-height:calc(100vh - 52px)}
+
+        /* ── NAV ── */
+        nav{width:200px;min-width:200px;background:var(--s1);border-right:1px solid var(--b1);
+            padding:12px 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto}
+        .nsec{padding:12px 14px 4px;font-family:var(--mono);font-size:8px;font-weight:700;
+            color:var(--text4);text-transform:uppercase;letter-spacing:1.5px}
+        .ni{display:flex;align-items:center;gap:9px;padding:7px 14px;cursor:pointer;
+            color:var(--text3);font-family:var(--mono);font-size:11px;font-weight:500;
+            transition:all .12s;border-left:2px solid transparent;user-select:none}
+        .ni:hover{background:var(--s2);color:var(--text2)}
+        .ni.active{background:rgba(0,229,255,.05);color:var(--cyan);border-left-color:var(--cyan)}
+        .ni-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+        .ni-badge{margin-left:auto;font-size:8px;padding:1px 5px;border-radius:3px;font-family:var(--mono);font-weight:700}
+
+        /* ── CONTENT ── */
+        .content{flex:1;padding:20px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:0}
+        .page{display:none;flex-direction:column;gap:16px;animation:fadeUp .2s ease}
+        .page.active{display:flex}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── PAGE TITLE ── */
+        .ptitle{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+        .ptitle-icon{font-size:18px}
+        .ptitle h2{font-family:var(--sans);font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+        .ptitle-line{flex:1;height:1px;background:linear-gradient(90deg,var(--b2),transparent)}
+        .ptitle-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:-8px;margin-bottom:8px;padding-left:30px}
 
         /* ── CARDS ── */
-        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
-        .card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2)}
-        .card-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;font-family:var(--mono);color:var(--text2)}
-        .card-body{padding:18px}
-        .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+        .grid.g1{grid-template-columns:1fr}
+        .grid.g2{grid-template-columns:1fr 1fr}
+        .grid.g3{grid-template-columns:1fr 1fr 1fr}
+        .card{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r3);overflow:hidden}
+        .card.accent-cyan{border-color:rgba(0,229,255,.2);background:rgba(0,229,255,.03)}
+        .card.accent-mint{border-color:rgba(0,255,179,.2);background:rgba(0,255,179,.02)}
+        .card.accent-violet{border-color:rgba(179,136,255,.2);background:rgba(179,136,255,.02)}
+        .card.accent-amber{border-color:rgba(255,204,2,.2);background:rgba(255,204,2,.02)}
+        .ch{padding:11px 16px;border-bottom:1px solid var(--b1);display:flex;align-items:center;
+            justify-content:space-between;background:var(--s3)}
+        .ch-title{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+            font-weight:700;color:var(--text2)}
+        .cb{padding:16px}
 
         /* ── FIELDS ── */
-        .field{display:flex;flex-direction:column;gap:5px}
-        .field label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-family:var(--mono)}
-        .field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:var(--r);outline:none;font-size:13px;transition:border-color .2s;font-family:var(--sans)}
-        .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
-        .field select option{background:var(--surface)}
-        .field textarea{resize:vertical;min-height:70px}
-        .form-row{display:grid;gap:12px}
-        .form-row.c2{grid-template-columns:1fr 1fr}
-        .form-row.c3{grid-template-columns:1fr 1fr 1fr}
-        .form-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+        .f{display:flex;flex-direction:column;gap:5px}
+        .f label{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--text3);
+            text-transform:uppercase;letter-spacing:.8px}
+        .f input,.f select,.f textarea{background:var(--bg);border:1px solid var(--b2);color:var(--text);
+            padding:8px 11px;border-radius:var(--r);font-family:var(--mono);font-size:11px;outline:none;
+            transition:all .18s}
+        .f input:focus,.f select:focus,.f textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-a);color:var(--text)}
+        .f select option{background:var(--s2)}
+        .f textarea{resize:vertical;min-height:60px}
+        .fr{display:grid;gap:10px}
+        .fr.c2{grid-template-columns:1fr 1fr}
+        .fr.c3{grid-template-columns:1fr 1fr 1fr}
+        .fr.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+        .mg{margin-top:10px}
 
         /* ── BUTTONS ── */
-        .btn{padding:8px 16px;border-radius:var(--r);font-size:11px;font-weight:700;border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px}
-        .btn:disabled{opacity:.4;cursor:not-allowed}
-        .btn-cyan{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#000;box-shadow:0 0 15px rgba(0,212,255,.15)}.btn-cyan:hover{box-shadow:0 0 25px rgba(0,212,255,.3);transform:translateY(-1px)}
-        .btn-green{background:linear-gradient(135deg,var(--green),#00aa77);color:#000}.btn-green:hover{opacity:.9;transform:translateY(-1px)}
-        .btn-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,102,.3)}.btn-red:hover{background:rgba(255,68,102,.2)}
-        .btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
-        .btn-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(255,184,0,.3)}.btn-amber:hover{background:rgba(255,184,0,.2)}
-        .btn-sm{padding:5px 12px;font-size:10px}
-        .btn-grp{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-
-        /* ── RESPONSE BOX ── */
-        .res-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);margin-top:14px;overflow:hidden}
-        .res-head{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2)}
-        .res-status{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700}
-        .s2xx{background:rgba(0,229,160,.15);color:var(--green)}
-        .s4xx{background:var(--red-dim);color:var(--red)}
-        .s5xx{background:var(--amber-dim);color:var(--amber)}
-        .s0{background:rgba(255,68,102,.15);color:var(--red)}
-        .res-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
-        .res-copy{margin-left:auto;background:none;border:1px solid var(--border);color:var(--text3);padding:2px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-family:var(--mono);transition:all .15s}
-        .res-copy:hover{color:var(--cyan);border-color:var(--cyan)}
-        .res-body{padding:12px;font-family:var(--mono);font-size:11px;line-height:1.8;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;color:var(--text2)}
-        .jk{color:#00d4ff}.js{color:#00e5a0}.jn{color:#ffb800}.jb{color:#c8a0ff}.je{color:#ff7799}
+        .btn{padding:7px 14px;border-radius:var(--r);font-size:10px;font-weight:700;border:none;
+            cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;
+            font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+        .btn:disabled{opacity:.35;cursor:not-allowed}
+        .btn:active:not(:disabled){transform:scale(.97)}
+        .b-cyan{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#000;
+            box-shadow:0 0 14px rgba(0,229,255,.15)}
+        .b-cyan:hover:not(:disabled){box-shadow:0 0 22px rgba(0,229,255,.3);transform:translateY(-1px)}
+        .b-mint{background:linear-gradient(135deg,var(--mint),#00cc8f);color:#000}
+        .b-mint:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+        .b-violet{background:var(--violet-a);color:var(--violet);border:1px solid rgba(179,136,255,.3)}
+        .b-violet:hover:not(:disabled){background:rgba(179,136,255,.18)}
+        .b-amber{background:var(--amber-a);color:var(--amber);border:1px solid rgba(255,204,2,.3)}
+        .b-amber:hover:not(:disabled){background:rgba(255,204,2,.18)}
+        .b-rose{background:var(--rose-a);color:var(--rose);border:1px solid rgba(255,77,109,.3)}
+        .b-rose:hover:not(:disabled){background:rgba(255,77,109,.18)}
+        .b-ghost{background:var(--s3);color:var(--text2);border:1px solid var(--b2)}
+        .b-ghost:hover:not(:disabled){color:var(--text);border-color:var(--b3)}
+        .b-blue{background:var(--blue-a);color:var(--blue);border:1px solid rgba(77,184,255,.3)}
+        .b-blue:hover:not(:disabled){background:rgba(77,184,255,.18)}
+        .bgrp{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
         /* ── METHOD BADGES ── */
-        .badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-        .m-get{background:rgba(0,229,160,.15);color:var(--green)}
-        .m-post{background:rgba(0,212,255,.15);color:var(--cyan)}
-        .m-put{background:rgba(255,184,0,.15);color:var(--amber)}
-        .m-del{background:rgba(255,68,102,.15);color:var(--red)}
-        .m-patch{background:rgba(77,159,255,.15);color:var(--blue)}
+        .mb{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:.3px}
+        .mg-get{background:rgba(0,255,179,.12);color:var(--mint)}
+        .mg-post{background:rgba(0,229,255,.12);color:var(--cyan)}
+        .mg-put{background:rgba(255,204,2,.12);color:var(--amber)}
+        .mg-del{background:rgba(255,77,109,.12);color:var(--rose)}
+        .mg-patch{background:rgba(77,184,255,.12);color:var(--blue)}
 
-        /* ── TOKEN DISPLAY ── */
-        .token-display{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:11px;color:var(--text3);word-break:break-all;line-height:1.7;min-height:52px}
-        .token-display.has-token{color:var(--cyan)}
+        /* ── RESPONSE BOX ── */
+        .res{background:var(--bg);border:1px solid var(--b2);border-radius:var(--r2);
+            margin-top:12px;overflow:hidden;animation:fadeUp .15s ease}
+        .res-head{display:flex;align-items:center;gap:10px;padding:7px 12px;
+            border-bottom:1px solid var(--b1);background:var(--s3)}
+        .st{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;font-weight:700}
+        .s2{background:rgba(0,255,179,.12);color:var(--mint)}
+        .s4{background:var(--rose-a);color:var(--rose)}
+        .s5{background:var(--amber-a);color:var(--amber)}
+        .s0{background:rgba(255,77,109,.15);color:var(--rose)}
+        .res-ms{font-family:var(--mono);font-size:9px;color:var(--text3)}
+        .res-cp{margin-left:auto;background:none;border:1px solid var(--b2);color:var(--text3);
+            padding:2px 8px;border-radius:3px;font-size:9px;cursor:pointer;font-family:var(--mono);
+            transition:all .15s}
+        .res-cp:hover{color:var(--cyan);border-color:var(--cyan)}
+        .res-body{padding:10px 12px;font-family:var(--mono);font-size:10px;line-height:1.9;
+            white-space:pre-wrap;word-break:break-all;max-height:280px;overflow-y:auto;color:var(--text2)}
+        .jk{color:#00e5ff}.js{color:#b3ffde}.jn{color:#ffcc02}.jb{color:#b388ff}.je{color:#ff8fa3}
 
-        .divider{height:1px;background:var(--border);margin:8px 0}
-        .empty{text-align:center;padding:32px;color:var(--text3);font-size:12px;font-family:var(--mono)}
-        .hint{font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--mono);padding:6px 10px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)}
+        /* ── TOKEN BOX ── */
+        .tok{background:var(--bg);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px;
+            font-family:var(--mono);font-size:10px;color:var(--text3);word-break:break-all;
+            line-height:1.7;min-height:48px}
+        .tok.has{color:var(--cyan)}
 
-        /* ── INMET ── */
-        .inmet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
-        .inmet-kv{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px}
-        .inmet-kv-label{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
-        .inmet-kv-val{font-size:15px;font-family:var(--mono);font-weight:700;color:var(--cyan)}
-        .inmet-kv-unit{font-size:10px;color:var(--text3);margin-left:3px}
-        .station-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:20px;padding:4px 14px;font-family:var(--mono);font-size:11px;color:var(--cyan)}
-        .station-pill-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+        /* ── HINT ── */
+        .hint{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--s3);
+            border:1px solid var(--b1);border-radius:var(--r);padding:7px 10px;line-height:1.7}
+        .hint code{color:var(--cyan)}
+        .hint.warn{border-color:rgba(255,204,2,.2);background:var(--amber-a);color:var(--amber)}
+        .hint.info{border-color:rgba(0,229,255,.2);background:var(--cyan-a);color:var(--cyan)}
 
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-        .page.active{animation:fadeIn .2s ease}
-        .res-box{animation:fadeIn .15s ease}
+        /* ── INMET PANEL ── */
+        .inmet-stat-bar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+        .inmet-stat-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,255,.06);
+            border:1px solid rgba(0,229,255,.2);border-radius:20px;padding:4px 14px;
+            font-family:var(--mono);font-size:10px;color:var(--cyan)}
+        .inmet-pulse{width:6px;height:6px;border-radius:50%;background:var(--mint);
+            box-shadow:0 0 6px var(--mint);animation:blink 2s infinite}
+        .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:12px}
+        .metric{background:var(--bg);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px}
+        .metric-lbl{font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;
+            letter-spacing:.8px;margin-bottom:4px}
+        .metric-val{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--cyan)}
+        .metric-unit{font-size:9px;color:var(--text3);margin-left:2px}
+        .table-wrap{overflow-x:auto;margin-top:12px}
+        table.inmet-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:9px}
+        .inmet-tbl th{padding:5px 8px;text-align:left;color:var(--text3);border-bottom:1px solid var(--b2);
+            white-space:nowrap;font-weight:600;font-size:8px;text-transform:uppercase;letter-spacing:.5px}
+        .inmet-tbl td{padding:4px 8px;color:var(--text2);border-bottom:1px solid var(--b1);white-space:nowrap}
+        .inmet-tbl tr:hover td{background:var(--s2)}
 
-        /* ── DEBUG BANNER ── */
-        .debug-banner{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:var(--r);padding:10px 14px;font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:12px}
-        .debug-banner strong{color:var(--cyan)}
+        /* ── DIVIDER ── */
+        .div-sec{height:1px;background:var(--b2);margin:4px 0 12px}
+        .sec-label{font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;
+            letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+        .sec-label::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar{width:4px;height:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--b3);border-radius:2px}
+        ::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+        /* ── LOADING SPINNER ── */
+        .spin{display:inline-block;width:12px;height:12px;border:2px solid transparent;
+            border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
     </style>
 </head>
 <body>
 
 <!-- ═══════════ AUTH SCREEN ═══════════ -->
 <div id="authScreen">
-    <div class="auth-card">
-        <div class="auth-logo">
-            <div class="auth-logo-icon">🌊</div>
-            <div>
-                <div class="auth-logo-text">Aqua<em>Orbital</em></div>
-                <div class="auth-subtitle">Sistema de Monitoramento</div>
+    <div class="auth-wrap">
+        <div class="auth-glow"></div>
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="auth-logo-mark">🌊</div>
+                <div>
+                    <div class="auth-logo-text">Aqua<span>Orbital</span></div>
+                    <div class="auth-logo-sub">API Test Dashboard</div>
+                </div>
             </div>
-        </div>
-        <div class="fgroup">
-            <label>Base URL da API</label>
-            <input id="authBase" type="text" value="http://localhost:8080" placeholder="http://localhost:8080">
-        </div>
-        <div class="auth-tabs">
-            <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
-            <button class="auth-tab" onclick="switchAuthTab('register')">Criar Conta</button>
-        </div>
-        <!-- LOGIN -->
-        <div id="loginForm">
-            <div id="loginMsg" class="msg"></div>
-            <div class="fgroup"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seu@email.com"></div>
-            <div class="fgroup"><label>Senha</label><input id="loginPass" type="password" placeholder="••••••••"></div>
-            <button class="btn-primary" onclick="doLogin()">→ Entrar</button>
-        </div>
-        <!-- REGISTER -->
-        <div id="registerForm" style="display:none">
-            <div id="registerMsg" class="msg"></div>
-            <div class="frow">
-                <div class="fgroup"><label>Nome</label><input id="regNome" type="text" placeholder="João Silva"></div>
-                <div class="fgroup"><label>E-mail</label><input id="regEmail" type="email" placeholder="joao@email.com"></div>
+            <div class="fg">
+                <label>Base URL</label>
+                <input id="authBase" value="http://localhost:8080" placeholder="http://localhost:8080">
             </div>
-            <div class="frow">
-                <div class="fgroup"><label>Senha <span style="color:var(--text3)">(mín. 6)</span></label><input id="regPass" type="password" placeholder="senha123"></div>
-                <div class="fgroup"><label>Telefone</label><input id="regTelefone" type="tel" placeholder="+5511999999999"></div>
+            <div class="auth-tabs">
+                <button class="atab active" onclick="switchTab('login')">Entrar</button>
+                <button class="atab" onclick="switchTab('register')">Registrar</button>
             </div>
-            <div class="fgroup">
-                <label>Perfil <span style="color:var(--amber);font-size:9px">— deve existir no banco</span></label>
-                <select id="regNomePerfil">
-                    <option value="OPERADOR_CAMPO">OPERADOR_CAMPO</option>
-                    <option value="PRODUTOR">PRODUTOR</option>
-                    <option value="COMPRADOR">COMPRADOR</option>
-                    <option value="ADMIN">ADMIN</option>
-                </select>
+
+            <!-- LOGIN -->
+            <div id="formLogin">
+                <div id="msgLogin" class="auth-msg"></div>
+                <div class="fg"><label>E-mail</label><input id="lEmail" type="email" placeholder="usuario@email.com"></div>
+                <div class="fg"><label>Senha</label><input id="lSenha" type="password" placeholder="••••••••"></div>
+                <button class="btn-auth" onclick="doLogin()">→ Entrar no sistema</button>
             </div>
-            <button class="btn-primary" onclick="doRegister()">→ Criar Conta</button>
+
+            <!-- REGISTER -->
+            <div id="formReg" style="display:none">
+                <div id="msgReg" class="auth-msg"></div>
+                <div class="frow">
+                    <div class="fg"><label>Nome</label><input id="rNome" placeholder="João Silva"></div>
+                    <div class="fg"><label>E-mail</label><input id="rEmail" type="email" placeholder="joao@email.com"></div>
+                </div>
+                <div class="frow">
+                    <div class="fg"><label>Senha <small style="color:var(--text3)">(mín. 6)</small></label><input id="rSenha" type="password" placeholder="senha123"></div>
+                    <div class="fg"><label>Telefone</label><input id="rTel" placeholder="+5511999999999"></div>
+                </div>
+                <div class="fg">
+                    <label>Perfil</label>
+                    <select id="rPerfil">
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="PRODUTOR">PRODUTOR</option>
+                        <option value="COMPRADOR">COMPRADOR</option>
+                        <option value="OPERADOR_CAMPO">OPERADOR_CAMPO</option>
+                    </select>
+                </div>
+                <button class="btn-auth" onclick="doRegister()">→ Criar conta</button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- ═══════════ APP SCREEN ═══════════ -->
-<div id="appScreen">
+<!-- ═══════════ APP ═══════════ -->
+<div id="app">
     <div class="topbar">
         <div class="topbar-logo">
-            <div class="topbar-logo-icon">🌊</div>
-            Aqua<em>Orbital</em>
+            <div class="topbar-mark">🌊</div>
+            Aqua<span>Orbital</span>
         </div>
-        <div class="topbar-url">
+        <div class="topbar-sep"></div>
+        <div class="url-wrap">
             <label>API</label>
-            <input id="appBase" type="text" value="http://localhost:8080" oninput="syncBase(this.value)">
+            <input id="appBase" value="http://localhost:8080" oninput="BASE=this.value.replace(/\/$/,'')">
         </div>
-        <div class="user-badge">
-            <span>logged as</span>
-            <strong id="userNameBadge">—</strong>
-            <span id="userRoleBadge" style="color:var(--green)"></span>
+        <div class="user-chip">
+            <div class="user-chip-dot"></div>
+            <span>logged:</span>
+            <strong id="uName">—</strong>
+            <em id="uRole"></em>
         </div>
-        <button class="btn-logout" onclick="doLogout()">← Sair</button>
+        <button class="btn-out" onclick="doLogout()">← sair</button>
     </div>
 
     <div class="layout">
         <nav>
-            <div class="nav-section">Auth</div>
-            <div class="nav-item active" onclick="goPage('auth')" data-page="auth"><div class="nav-dot" style="background:var(--red)"></div>Auth / Token</div>
+            <div class="nsec">Autenticação</div>
+            <div class="ni active" onclick="goPage('auth')" data-p="auth"><div class="ni-dot" style="background:var(--rose)"></div>Auth / JWT</div>
 
-            <div class="nav-section">Usuários</div>
-            <div class="nav-item" onclick="goPage('usuario')" data-page="usuario"><div class="nav-dot" style="background:var(--cyan)"></div>Usuários</div>
-            <div class="nav-item" onclick="goPage('perfil')" data-page="perfil"><div class="nav-dot" style="background:#c8a0ff"></div>Perfis</div>
+            <div class="nsec">Usuários</div>
+            <div class="ni" onclick="goPage('usuario')" data-p="usuario"><div class="ni-dot" style="background:var(--cyan)"></div>Usuários</div>
+            <div class="ni" onclick="goPage('perfil')" data-p="perfil"><div class="ni-dot" style="background:var(--violet)"></div>Perfis</div>
 
-            <div class="nav-section">Produção</div>
-            <div class="nav-item" onclick="goPage('fazenda')" data-page="fazenda"><div class="nav-dot" style="background:var(--green)"></div>Fazendas</div>
-            <div class="nav-item" onclick="goPage('tanque')" data-page="tanque"><div class="nav-dot" style="background:var(--amber)"></div>Tanques</div>
+            <div class="nsec">Produção</div>
+            <div class="ni" onclick="goPage('fazenda')" data-p="fazenda"><div class="ni-dot" style="background:var(--mint)"></div>Fazendas</div>
+            <div class="ni" onclick="goPage('tanque')" data-p="tanque"><div class="ni-dot" style="background:var(--amber)"></div>Tanques</div>
 
-            <div class="nav-section">Dados & Mercado</div>
-            <div class="nav-item" onclick="goPage('orbital')" data-page="orbital"><div class="nav-dot" style="background:var(--cyan)"></div>Dados Orbitais</div>
-            <div class="nav-item" onclick="goPage('inmet')" data-page="inmet"><div class="nav-dot" style="background:var(--green);box-shadow:0 0 5px var(--green)"></div>INMET Estações</div>
-            <div class="nav-item" onclick="goPage('marketplace')" data-page="marketplace"><div class="nav-dot" style="background:var(--red)"></div>Marketplace</div>
+            <div class="nsec">APIs Orbitais</div>
+            <div class="ni" onclick="goPage('nasa')" data-p="nasa"><div class="ni-dot" style="background:var(--cyan);box-shadow:0 0 5px var(--cyan)"></div>NASA POWER</div>
+            <div class="ni" onclick="goPage('openmeteo')" data-p="openmeteo"><div class="ni-dot" style="background:var(--mint);box-shadow:0 0 5px var(--mint)"></div>Open-Meteo RT</div>
+            <div class="ni" onclick="goPage('era5')" data-p="era5"><div class="ni-dot" style="background:var(--violet);box-shadow:0 0 5px var(--violet)"></div>ERA5 Archive</div>
+            <div class="ni" onclick="goPage('inmet')" data-p="inmet"><div class="ni-dot" style="background:var(--amber);box-shadow:0 0 5px var(--amber)"></div>INMET BR</div>
+
+            <div class="nsec">Mercado</div>
+            <div class="ni" onclick="goPage('marketplace')" data-p="marketplace"><div class="ni-dot" style="background:var(--rose)"></div>Marketplace</div>
         </nav>
 
         <div class="content">
 
             <!-- ═══════ AUTH PAGE ═══════ -->
             <div class="page active" id="page-auth">
-                <div class="page-title">🔐 Auth / Token <div class="page-title-line"></div></div>
-                <div class="card-grid">
+                <div class="ptitle"><div class="ptitle-icon">🔐</div><h2>Autenticação / JWT</h2><div class="ptitle-line"></div></div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/auth/register</div></div>
-                        <div class="card-body">
-                            <div class="hint">Campo <code style="color:var(--cyan)">nomePerfil</code> deve corresponder a um perfil já cadastrado no banco.</div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Nome</label><input id="ar_nome" placeholder="João Silva"></div>
-                                <div class="field"><label>E-mail</label><input id="ar_email" type="email" placeholder="joao@email.com"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/auth/register</div></div>
+                        <div class="cb">
+                            <div class="fr c2">
+                                <div class="f"><label>Nome</label><input id="ar_nome" placeholder="João Silva"></div>
+                                <div class="f"><label>E-mail</label><input id="ar_email" type="email" placeholder="joao@email.com"></div>
                             </div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Senha <span style="color:var(--text3)">(mín. 6)</span></label><input id="ar_senha" type="password" placeholder="senha123"></div>
-                                <div class="field"><label>Telefone</label><input id="ar_telefone" placeholder="+5511999999999"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Senha</label><input id="ar_senha" type="password" placeholder="senha123"></div>
+                                <div class="f"><label>Telefone</label><input id="ar_tel" placeholder="+5511999999999"></div>
                             </div>
-                            <div class="field" style="margin-top:10px">
-                                <label>nomePerfil</label>
-                                <select id="ar_nomePerfil">
-                                    <option value="OPERADOR_CAMPO">OPERADOR_CAMPO</option>
-                                    <option value="PRODUTOR">PRODUTOR</option>
-                                    <option value="COMPRADOR">COMPRADOR</option>
-                                    <option value="ADMIN">ADMIN</option>
+                            <div class="f mg">
+                                <label>Perfil</label>
+                                <select id="ar_perfil">
+                                    <option value="ADMIN">ADMIN</option><option value="PRODUTOR">PRODUTOR</option>
+                                    <option value="COMPRADOR">COMPRADOR</option><option value="OPERADOR_CAMPO">OPERADOR_CAMPO</option>
                                 </select>
                             </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-cyan" onclick="reqRegister()">Registrar</button>
-                            </div>
-                            <div id="res_ar"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="reqRegister()">Registrar usuário</button></div>
+                            <div id="r_ar"></div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/auth/login</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>E-mail</label><input id="al_email" placeholder="joao@email.com"></div>
-                            <div class="field" style="margin-top:10px"><label>Senha</label><input id="al_senha" type="password" placeholder="••••••••"></div>
-                            <div class="hint" style="margin-top:8px">🔑 Salva o JWT automaticamente para todas as requisições autenticadas</div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="reqLogin()">Login + salvar token</button>
-                            </div>
-                            <div id="res_al"></div>
+                    <div class="card accent-cyan">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/auth/login</div></div>
+                        <div class="cb">
+                            <div class="hint info">🔑 O JWT é salvo automaticamente e usado em todas as requisições autenticadas</div>
+                            <div class="f mg"><label>E-mail</label><input id="al_email" placeholder="joao@email.com"></div>
+                            <div class="f mg"><label>Senha</label><input id="al_senha" type="password" placeholder="••••••••"></div>
+                            <div class="bgrp"><button class="btn b-mint" onclick="reqLogin()">Login + salvar JWT</button></div>
+                            <div id="r_al"></div>
                         </div>
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-header"><div class="card-title">🔑 JWT Token ativo</div></div>
-                    <div class="card-body">
-                        <div class="token-display" id="tokenDisplay">Nenhum token salvo — faça o login acima.</div>
-                        <div class="btn-grp">
-                            <button class="btn btn-ghost btn-sm" onclick="copyToken()">Copiar</button>
-                            <button class="btn btn-red btn-sm" onclick="clearToken()">Limpar</button>
+                    <div class="ch"><div class="ch-title">🔑 JWT Token ativo</div></div>
+                    <div class="cb">
+                        <div class="tok" id="tokDisplay">Nenhum token — faça login acima.</div>
+                        <div class="bgrp">
+                            <button class="btn b-ghost" onclick="navigator.clipboard.writeText(JWT).catch(()=>{})">Copiar</button>
+                            <button class="btn b-rose" onclick="JWT='';updateTok()">Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -310,45 +424,45 @@
 
             <!-- ═══════ USUARIO PAGE ═══════ -->
             <div class="page" id="page-usuario">
-                <div class="page-title">👤 Usuários <div class="page-title-line"></div></div>
-                <div class="card-grid">
+                <div class="ptitle"><div class="ptitle-icon">👤</div><h2>Usuários</h2><div class="ptitle-line"></div></div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/usuarios</div></div>
-                        <div class="card-body">
-                            <div class="hint">Suporta paginação: ?page=0&size=10&sort=nome</div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/usuarios',null,'res_u_all')">Listar todos</button></div>
-                            <div id="res_u_all"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/usuarios</div></div>
+                        <div class="cb">
+                            <div class="hint">Paginado — parâmetros: <code>?page=0&size=10&sort=nome</code></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET','/api/usuarios',null,'r_u_all')">Listar todos</button></div>
+                            <div id="r_u_all"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/usuarios/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do usuário</label><input id="u_get_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/usuarios/${v('u_get_id')}`,null,'res_u_id')">Buscar</button></div>
-                            <div id="res_u_id"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/usuarios/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="u_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/usuarios/${v('u_id')}`,null,'r_u_id')">Buscar</button></div>
+                            <div id="r_u_id"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/usuarios/perfil/{idPerfil}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do Perfil</label><input id="u_perf_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/usuarios/perfil/${v('u_perf_id')}`,null,'res_u_perfil')">Listar por perfil</button></div>
-                            <div id="res_u_perfil"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/usuarios/perfil/{idPerfil}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID do Perfil</label><input id="u_pid" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/usuarios/perfil/${v('u_pid')}`,null,'r_u_perf')">Listar por perfil</button></div>
+                            <div id="r_u_perf"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-put">PUT</span> / <span class="badge m-del">DELETE</span>&nbsp;/api/usuarios/{id}</div></div>
-                        <div class="card-body">
-                            <div class="form-row c2">
-                                <div class="field"><label>ID</label><input id="u_put_id" placeholder="1" type="number"></div>
-                                <div class="field"><label>Nome</label><input id="u_put_nome" placeholder="Novo nome"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-put">PUT</span> <span class="mb mg-del">DEL</span>/api/usuarios/{id}</div></div>
+                        <div class="cb">
+                            <div class="fr c2">
+                                <div class="f"><label>ID</label><input id="u_put_id" placeholder="1" type="number"></div>
+                                <div class="f"><label>Nome</label><input id="u_put_nome" placeholder="Novo nome"></div>
                             </div>
-                            <div class="field" style="margin-top:10px"><label>E-mail</label><input id="u_put_email" type="email" placeholder="novo@email.com"></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="req('PUT',`/api/usuarios/${v('u_put_id')}`,cleanObj({nome:v('u_put_nome'),email:v('u_put_email')}),'res_u_put')">Atualizar</button>
-                                <button class="btn btn-red" onclick="req('DELETE',`/api/usuarios/${v('u_put_id')}`,null,'res_u_put')">Deletar</button>
+                            <div class="f mg"><label>E-mail</label><input id="u_put_email" type="email" placeholder="novo@email.com"></div>
+                            <div class="bgrp">
+                                <button class="btn b-amber" onclick="req('PUT',`/api/usuarios/${v('u_put_id')}`,clean({nome:v('u_put_nome'),email:v('u_put_email')}),'r_u_put')">Atualizar</button>
+                                <button class="btn b-rose" onclick="req('DELETE',`/api/usuarios/${v('u_put_id')}`,null,'r_u_put')">Deletar</button>
                             </div>
-                            <div id="res_u_put"></div>
+                            <div id="r_u_put"></div>
                         </div>
                     </div>
                 </div>
@@ -356,43 +470,39 @@
 
             <!-- ═══════ PERFIL PAGE ═══════ -->
             <div class="page" id="page-perfil">
-                <div class="page-title">🪪 Perfis <div class="page-title-line"></div></div>
-                <div class="hint" style="margin-bottom:4px">⚠️ Os perfis devem ser criados no banco antes do registro de usuários. ADMIN, PRODUTOR, COMPRADOR, OPERADOR_CAMPO são os padrões.</div>
-                <div class="card-grid">
+                <div class="ptitle"><div class="ptitle-icon">🪪</div><h2>Perfis</h2><div class="ptitle-line"></div></div>
+                <div class="hint warn" style="margin-bottom:8px">⚠ Perfis devem existir no banco antes do registro de usuários. Padrões: ADMIN, PRODUTOR, COMPRADOR, OPERADOR_CAMPO</div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/perfis</div></div>
-                        <div class="card-body">
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/perfis',null,'res_p_all')">Listar todos</button></div>
-                            <div id="res_p_all"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/perfis</div></div>
+                        <div class="cb">
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET','/api/perfis',null,'r_p_all')">Listar todos</button></div>
+                            <div id="r_p_all"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/perfis/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do perfil</label><input id="p_get_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/perfis/${v('p_get_id')}`,null,'res_p_id')">Buscar</button></div>
-                            <div id="res_p_id"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/perfis/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="p_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/perfis/${v('p_id')}`,null,'r_p_id')">Buscar</button></div>
+                            <div id="r_p_id"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/perfis</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>nomePerfil</label><input id="p_nome" placeholder="PRODUTOR"></div>
-                            <div class="field" style="margin-top:10px"><label>Descrição</label><input id="p_desc" placeholder="Produtor de aquicultura"></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="req('POST','/api/perfis',cleanObj({nomePerfil:v('p_nome'),descricao:v('p_desc')}),'res_p_post')">Criar perfil</button>
-                            </div>
-                            <div id="res_p_post"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/perfis</div></div>
+                        <div class="cb">
+                            <div class="f"><label>Nome do Perfil</label><input id="p_nome" placeholder="PRODUTOR"></div>
+                            <div class="f mg"><label>Descrição</label><input id="p_desc" placeholder="Produtor de aquicultura"></div>
+                            <div class="bgrp"><button class="btn b-mint" onclick="req('POST','/api/perfis',clean({nomePerfil:v('p_nome'),descricao:v('p_desc')}),'r_p_post')">Criar</button></div>
+                            <div id="r_p_post"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-del">DELETE</span>/api/perfis/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do perfil</label><input id="p_del_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-red" onclick="req('DELETE',`/api/perfis/${v('p_del_id')}`,null,'res_p_del')">Deletar</button>
-                            </div>
-                            <div id="res_p_del"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-del">DELETE</span>/api/perfis/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="p_del_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-rose" onclick="req('DELETE',`/api/perfis/${v('p_del_id')}`,null,'r_p_del')">Deletar</button></div>
+                            <div id="r_p_del"></div>
                         </div>
                     </div>
                 </div>
@@ -400,70 +510,67 @@
 
             <!-- ═══════ FAZENDA PAGE ═══════ -->
             <div class="page" id="page-fazenda">
-                <div class="page-title">🌾 Fazendas <div class="page-title-line"></div></div>
-                <div class="card-grid">
+                <div class="ptitle"><div class="ptitle-icon">🌾</div><h2>Fazendas</h2><div class="ptitle-line"></div></div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/fazendas</div></div>
-                        <div class="card-body">
-                            <div class="hint">Paginado. Usuário logado verá apenas suas fazendas (filtro por JWT).</div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/fazendas',null,'res_f_all')">Listar todas</button></div>
-                            <div id="res_f_all"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/fazendas</div></div>
+                        <div class="cb">
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET','/api/fazendas',null,'r_f_all')">Listar todas</button></div>
+                            <div id="r_f_all"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/fazendas/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID da fazenda</label><input id="f_get_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/fazendas/${v('f_get_id')}`,null,'res_f_id')">Buscar</button></div>
-                            <div id="res_f_id"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/fazendas/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="f_get_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/fazendas/${v('f_get_id')}`,null,'r_f_id')">Buscar</button></div>
+                            <div id="r_f_id"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/fazendas/{id}/dashboard</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID da fazenda</label><input id="f_dash_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/fazendas/${v('f_dash_id')}/dashboard`,null,'res_f_dash')">Ver dashboard</button></div>
-                            <div id="res_f_dash"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/fazendas/{id}/dashboard</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="f_dash_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/fazendas/${v('f_dash_id')}/dashboard`,null,'r_f_dash')">Dashboard</button></div>
+                            <div id="r_f_dash"></div>
                         </div>
                     </div>
                 </div>
-                <div class="card-grid">
-                    <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/fazendas</div></div>
-                        <div class="card-body">
-                            <div class="hint">O ID do usuário responsável é extraído automaticamente do JWT.</div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Nome</label><input id="f_nome" placeholder="Fazenda Mar Azul"></div>
-                                <div class="field"><label>Cidade</label><input id="f_cidade" placeholder="Laguna"></div>
+                <div class="grid g2">
+                    <div class="card accent-mint">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/fazendas</div></div>
+                        <div class="cb">
+                            <div class="hint">O responsável é extraído do JWT automaticamente</div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Nome</label><input id="f_nome" placeholder="Fazenda Mar Azul"></div>
+                                <div class="f"><label>Cidade</label><input id="f_cidade" placeholder="Laguna"></div>
                             </div>
-                            <div class="form-row c3" style="margin-top:10px">
-                                <div class="field"><label>UF</label><input id="f_uf" placeholder="SC" maxlength="2"></div>
-                                <div class="field"><label>Latitude</label><input id="f_lat" placeholder="-28.48" type="number" step="any"></div>
-                                <div class="field"><label>Longitude</label><input id="f_lon" placeholder="-48.77" type="number" step="any"></div>
+                            <div class="fr c3 mg">
+                                <div class="f"><label>UF</label><input id="f_uf" placeholder="SC" maxlength="2"></div>
+                                <div class="f"><label>Latitude</label><input id="f_lat" placeholder="-28.48" type="number" step="any"></div>
+                                <div class="f"><label>Longitude</label><input id="f_lon" placeholder="-48.77" type="number" step="any"></div>
                             </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="req('POST','/api/fazendas',cleanObj({nome:v('f_nome'),cidade:v('f_cidade'),uf:v('f_uf'),latitude:dec('f_lat'),longitude:dec('f_lon')}),'res_f_post')">Criar</button>
-                            </div>
-                            <div id="res_f_post"></div>
+                            <div class="bgrp"><button class="btn b-mint" onclick="req('POST','/api/fazendas',clean({nome:v('f_nome'),cidade:v('f_cidade'),uf:v('f_uf'),latitude:dec('f_lat'),longitude:dec('f_lon')}),'r_f_post')">Criar fazenda</button></div>
+                            <div id="r_f_post"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-put">PUT</span> / <span class="badge m-del">DELETE</span>&nbsp;/api/fazendas/{id}</div></div>
-                        <div class="card-body">
-                            <div class="form-row c2">
-                                <div class="field"><label>ID</label><input id="f_put_id" placeholder="1" type="number"></div>
-                                <div class="field"><label>Nome</label><input id="f_put_nome" placeholder="Novo nome"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-put">PUT</span> <span class="mb mg-del">DEL</span>/api/fazendas/{id}</div></div>
+                        <div class="cb">
+                            <div class="fr c2">
+                                <div class="f"><label>ID</label><input id="f_put_id" placeholder="1" type="number"></div>
+                                <div class="f"><label>Nome</label><input id="f_put_nome" placeholder="Novo nome"></div>
                             </div>
-                            <div class="form-row c3" style="margin-top:10px">
-                                <div class="field"><label>Cidade</label><input id="f_put_cidade" placeholder="Nova cidade"></div>
-                                <div class="field"><label>UF</label><input id="f_put_uf" placeholder="SC" maxlength="2"></div>
-                                <div class="field"><label>Status</label><select id="f_put_status"><option value="">—</option><option value="A">A (Ativo)</option><option value="I">I (Inativo)</option></select></div>
+                            <div class="fr c3 mg">
+                                <div class="f"><label>Cidade</label><input id="f_put_cidade" placeholder="Nova cidade"></div>
+                                <div class="f"><label>UF</label><input id="f_put_uf" placeholder="SC" maxlength="2"></div>
+                                <div class="f"><label>Status</label><select id="f_put_st"><option value="">—</option><option value="ATIVA">ATIVA</option><option value="INATIVA">INATIVA</option></select></div>
                             </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="req('PUT',`/api/fazendas/${v('f_put_id')}`,cleanObj({nome:v('f_put_nome'),cidade:v('f_put_cidade'),uf:v('f_put_uf'),status:v('f_put_status')}),'res_f_put')">Atualizar</button>
-                                <button class="btn btn-red" onclick="req('DELETE',`/api/fazendas/${v('f_put_id')}`,null,'res_f_put')">Deletar</button>
+                            <div class="bgrp">
+                                <button class="btn b-amber" onclick="req('PUT',`/api/fazendas/${v('f_put_id')}`,clean({nome:v('f_put_nome'),cidade:v('f_put_cidade'),uf:v('f_put_uf'),status:v('f_put_st')}),'r_f_put')">Atualizar</button>
+                                <button class="btn b-rose" onclick="req('DELETE',`/api/fazendas/${v('f_put_id')}`,null,'r_f_put')">Deletar</button>
                             </div>
-                            <div id="res_f_put"></div>
+                            <div id="r_f_put"></div>
                         </div>
                     </div>
                 </div>
@@ -471,256 +578,367 @@
 
             <!-- ═══════ TANQUE PAGE ═══════ -->
             <div class="page" id="page-tanque">
-                <div class="page-title">🪣 Tanques <div class="page-title-line"></div></div>
-                <div class="card-grid">
+                <div class="ptitle"><div class="ptitle-icon">🪣</div><h2>Tanques</h2><div class="ptitle-line"></div></div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/tanques</div></div>
-                        <div class="card-body">
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/tanques',null,'res_t_all')">Listar todos</button></div>
-                            <div id="res_t_all"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/tanques</div></div>
+                        <div class="cb">
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET','/api/tanques',null,'r_t_all')">Listar todos</button></div>
+                            <div id="r_t_all"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/tanques/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do tanque</label><input id="t_get_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/tanques/${v('t_get_id')}`,null,'res_t_id')">Buscar</button></div>
-                            <div id="res_t_id"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/tanques/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="t_get_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/tanques/${v('t_get_id')}`,null,'r_t_id')">Buscar</button></div>
+                            <div id="r_t_id"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/tanques/fazenda/{fazendaId}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID da fazenda</label><input id="t_faz_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/tanques/fazenda/${v('t_faz_id')}`,null,'res_t_faz')">Listar por fazenda</button></div>
-                            <div id="res_t_faz"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/tanques/fazenda/{fazendaId}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID Fazenda</label><input id="t_faz" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/tanques/fazenda/${v('t_faz')}`,null,'r_t_faz')">Listar por fazenda</button></div>
+                            <div id="r_t_faz"></div>
                         </div>
                     </div>
                 </div>
-                <div class="card-grid">
-                    <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/tanques</div></div>
-                        <div class="card-body">
-                            <div class="form-row c2">
-                                <div class="field"><label>ID Fazenda</label><input id="t_fid" placeholder="1" type="number"></div>
-                                <div class="field"><label>Código do tanque</label><input id="t_cod" placeholder="TANQUE-A1"></div>
+                <div class="grid g2">
+                    <div class="card accent-amber">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/tanques</div></div>
+                        <div class="cb">
+                            <div class="fr c2">
+                                <div class="f"><label>ID Fazenda</label><input id="t_fid" placeholder="1" type="number"></div>
+                                <div class="f"><label>Código</label><input id="t_cod" placeholder="TANQUE-A1"></div>
                             </div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Tipo de Alga</label><input id="t_alga" placeholder="Spirulina"></div>
-                                <div class="field"><label>Capacidade (L)</label><input id="t_cap" placeholder="5000" type="number"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Tipo Alga</label><input id="t_alga" placeholder="Spirulina"></div>
+                                <div class="f"><label>Capacidade (L)</label><input id="t_cap" placeholder="5000" type="number"></div>
                             </div>
-                            <div class="form-row c4" style="margin-top:10px">
-                                <div class="field"><label>pH Mín</label><input id="t_phmin" placeholder="6.5" type="number" step="0.1"></div>
-                                <div class="field"><label>pH Máx</label><input id="t_phmax" placeholder="8.0" type="number" step="0.1"></div>
-                                <div class="field"><label>Temp. Mín</label><input id="t_tmin" placeholder="18" type="number" step="0.1"></div>
-                                <div class="field"><label>Temp. Máx</label><input id="t_tmax" placeholder="30" type="number" step="0.1"></div>
+                            <div class="fr c4 mg">
+                                <div class="f"><label>pH Mín</label><input id="t_phmin" placeholder="6.5" type="number" step="0.1"></div>
+                                <div class="f"><label>pH Máx</label><input id="t_phmax" placeholder="8.0" type="number" step="0.1"></div>
+                                <div class="f"><label>T° Mín</label><input id="t_tmin" placeholder="18" type="number" step="0.1"></div>
+                                <div class="f"><label>T° Máx</label><input id="t_tmax" placeholder="30" type="number" step="0.1"></div>
                             </div>
-                            <div class="field" style="margin-top:10px"><label>Dt. Instalação</label><input id="t_dt" type="date"></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="reqCriarTanque()">Criar</button>
-                            </div>
-                            <div id="res_t_post"></div>
+                            <div class="f mg"><label>Data Instalação</label><input id="t_dt" type="date"></div>
+                            <div class="bgrp"><button class="btn b-amber" onclick="reqCriarTanque()">Criar tanque</button></div>
+                            <div id="r_t_post"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-put">PUT</span> / <span class="badge m-del">DELETE</span>&nbsp;/api/tanques/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do tanque</label><input id="t_put_id" placeholder="1" type="number"></div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Tipo de Alga</label><input id="t_put_alga" placeholder="Spirulina"></div>
-                                <div class="field"><label>Capacidade (L)</label><input id="t_put_cap" placeholder="6000" type="number"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-put">PUT</span> <span class="mb mg-del">DEL</span>/api/tanques/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="t_put_id" placeholder="1" type="number"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Tipo Alga</label><input id="t_put_alga" placeholder="Chlorella"></div>
+                                <div class="f"><label>Capacidade (L)</label><input id="t_put_cap" placeholder="6000" type="number"></div>
                             </div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>pH Mín</label><input id="t_put_phmin" placeholder="6.5" type="number" step="0.1"></div>
-                                <div class="field"><label>pH Máx</label><input id="t_put_phmax" placeholder="8.0" type="number" step="0.1"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>pH Mín</label><input id="t_put_phmin" placeholder="6.5" type="number" step="0.1"></div>
+                                <div class="f"><label>pH Máx</label><input id="t_put_phmax" placeholder="8.0" type="number" step="0.1"></div>
                             </div>
-                            <div class="field" style="margin-top:10px"><label>Status</label><select id="t_put_status"><option value="">—</option><option value="A">A (Ativo)</option><option value="I">I (Inativo)</option></select></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="reqAtualizarTanque()">Atualizar</button>
-                                <button class="btn btn-red" onclick="req('DELETE',`/api/tanques/${v('t_put_id')}`,null,'res_t_put')">Deletar</button>
+                            <div class="f mg"><label>Status</label><select id="t_put_st"><option value="">—</option><option value="ATIVO">ATIVO</option><option value="INATIVO">INATIVO</option></select></div>
+                            <div class="bgrp">
+                                <button class="btn b-amber" onclick="reqAtualizarTanque()">Atualizar</button>
+                                <button class="btn b-rose" onclick="req('DELETE',`/api/tanques/${v('t_put_id')}`,null,'r_t_put')">Deletar</button>
                             </div>
-                            <div id="res_t_put"></div>
+                            <div id="r_t_put"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ═══════ ORBITAL PAGE ═══════ -->
-            <div class="page" id="page-orbital">
-                <div class="page-title">🛰 Dados Orbitais (NASA POWER) <div class="page-title-line"></div></div>
-                <div class="card-grid">
-                    <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dados-orbitais/fazenda/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID da fazenda</label><input id="o_faz_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('o_faz_id')}`,null,'res_o_faz')">Listar dados</button></div>
-                            <div id="res_o_faz"></div>
+            <!-- ═══════ NASA POWER PAGE ═══════ -->
+            <div class="page" id="page-nasa">
+                <div class="ptitle"><div class="ptitle-icon">🛰</div><h2>NASA POWER — Dados Orbitais</h2><div class="ptitle-line"></div></div>
+                <div class="ptitle-sub">fonte=NASA_POWER · parâmetros: ALLSKY_SFC_PAR_TOT, CLOUD_AMT, T2M · community=AG · scheduler: 06:00 diário</div>
+                <div class="hint info">Scheduler <code>NasaSyncScheduler</code> executa automaticamente às 06:00 todo dia para todas as fazendas. Use o endpoint abaixo para sincronização manual.</div>
+                <div class="grid">
+                    <div class="card accent-cyan">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/dados-orbitais/fazenda/{id}/sincronizar</div></div>
+                        <div class="cb">
+                            <div class="hint">🛰 Chama a <code>NASA POWER API</code> com as coordenadas da fazenda e persiste dados de irradiância PAR, temperatura e nebulosidade</div>
+                            <div class="f mg"><label>ID da Fazenda</label><input id="nasa_sync_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('POST',`/api/dados-orbitais/fazenda/${v('nasa_sync_id')}/sincronizar`,{},'r_nasa_sync')">🛰 Sincronizar NASA POWER</button></div>
+                            <div id="r_nasa_sync"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dados-orbitais/fazenda/{id}/ultimo</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID da fazenda</label><input id="o_ult_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('o_ult_id')}/ultimo`,null,'res_o_ult')">Buscar último</button></div>
-                            <div id="res_o_ult"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/fazenda/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID Fazenda</label><input id="nasa_faz" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('nasa_faz')}`,null,'r_nasa_faz')">Listar dados</button></div>
+                            <div id="r_nasa_faz"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dados-orbitais/fazenda/{id}/periodo</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID da fazenda</label><input id="o_per_id" placeholder="1" type="number"></div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Início</label><input id="o_per_ini" type="date"></div>
-                                <div class="field"><label>Fim</label><input id="o_per_fim" type="date"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/fazenda/{id}/ultimo</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID Fazenda</label><input id="nasa_ult" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('nasa_ult')}/ultimo`,null,'r_nasa_ult')">Buscar último</button></div>
+                            <div id="r_nasa_ult"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/fazenda/{id}/periodo</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID Fazenda</label><input id="nasa_per_id" placeholder="1" type="number"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Início</label><input id="nasa_per_ini" type="date"></div>
+                                <div class="f"><label>Fim</label><input id="nasa_per_fim" type="date"></div>
                             </div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('o_per_id')}/periodo?inicio=${v('o_per_ini')}&fim=${v('o_per_fim')}`,null,'res_o_per')">Buscar por período</button></div>
-                            <div id="res_o_per"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('nasa_per_id')}/periodo?inicio=${v('nasa_per_ini')}&fim=${v('nasa_per_fim')}`,null,'r_nasa_per')">Buscar período</button></div>
+                            <div id="r_nasa_per"></div>
                         </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/dados-orbitais/fazenda/{fazendaId}/sincronizar — NASA POWER</div></div>
-                    <div class="card-body">
-                        <div class="hint">🛰 Busca dados reais de irradiância PAR, temperatura e nebulosidade da NASA POWER API usando as coordenadas da fazenda e persiste no banco.</div>
-                        <div class="field" style="margin-top:12px;max-width:200px"><label>ID da fazenda</label><input id="o_sync_id" placeholder="1" type="number"></div>
-                        <div class="btn-grp">
-                            <button class="btn btn-green" onclick="req('POST',`/api/dados-orbitais/fazenda/${v('o_sync_id')}/sincronizar`,{},'res_o_sync')">🛰 Sincronizar NASA POWER</button>
+
+                <div class="sec-label" style="margin-top:8px">Teste direto — NASA POWER API pública</div>
+                <div class="card accent-cyan">
+                    <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>power.larc.nasa.gov — chamada direta ao endpoint NASA</div></div>
+                    <div class="cb">
+                        <div class="hint">Chama diretamente a API da NASA com os parâmetros ALLSKY_SFC_PAR_TOT, CLOUD_AMT, T2M, RH2M</div>
+                        <div class="fr c2 mg">
+                            <div class="f"><label>Latitude</label><input id="np_lat" placeholder="-23.515" type="number" step="any" value="-23.515"></div>
+                            <div class="f"><label>Longitude</label><input id="np_lon" placeholder="-46.611" type="number" step="any" value="-46.611"></div>
                         </div>
-                        <div id="res_o_sync"></div>
+                        <div class="fr c2 mg">
+                            <div class="f"><label>Data Início (yyyyMMdd)</label><input id="np_start" placeholder="20240101" value="20240101"></div>
+                            <div class="f"><label>Data Fim (yyyyMMdd)</label><input id="np_end" placeholder="20241231" value="20241231"></div>
+                        </div>
+                        <div class="bgrp"><button class="btn b-cyan" onclick="callNasaDirect()">🛰 Chamar NASA POWER direto</button></div>
+                        <div id="r_nasa_direct"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════ OPEN-METEO RT PAGE ═══════ -->
+            <div class="page" id="page-openmeteo">
+                <div class="ptitle"><div class="ptitle-icon">⛅</div><h2>Open-Meteo Forecast — Tempo Real</h2><div class="ptitle-line"></div></div>
+                <div class="ptitle-sub">fonte=OPEN_METEO · shortwave_radiation, cloud_cover, temp_2m, rh_2m · scheduler: a cada 15 min</div>
+                <div class="hint info">Scheduler <code>OpenMeteoSyncScheduler</code> executa a cada 15 minutos para todas as fazendas. Faz upsert: atualiza se já existe OPEN_METEO para o dia, pula se outra fonte.</div>
+                <div class="grid">
+                    <div class="card accent-mint">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/dados-orbitais/open-meteo/fazenda/{id}/sincronizar</div></div>
+                        <div class="cb">
+                            <div class="hint">⚡ Busca previsão de 2 dias (shortwave_radiation, cloud_cover, temperature_2m, relative_humidity_2m) e salva médias diárias</div>
+                            <div class="f mg"><label>ID da Fazenda</label><input id="om_sync_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-mint" onclick="req('POST',`/api/dados-orbitais/open-meteo/fazenda/${v('om_sync_id')}/sincronizar`,{},'r_om_sync')">⚡ Sincronizar Open-Meteo</button></div>
+                            <div id="r_om_sync"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ch"><div class="ch-title">📡 Dados no banco (fonte=OPEN_METEO)</div></div>
+                        <div class="cb">
+                            <div class="hint">Use os endpoints <code>/api/dados-orbitais/fazenda/{id}</code> e filtre por fonte=OPEN_METEO</div>
+                            <div class="f"><label>ID Fazenda</label><input id="om_faz" placeholder="1" type="number"></div>
+                            <div class="bgrp">
+                                <button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('om_faz')}`,null,'r_om_faz')">Ver todos os dados</button>
+                                <button class="btn b-ghost" onclick="req('GET',`/api/dados-orbitais/fazenda/${v('om_faz')}/ultimo`,null,'r_om_faz')">Último registro</button>
+                            </div>
+                            <div id="r_om_faz"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sec-label" style="margin-top:8px">Teste direto — Open-Meteo Forecast API pública</div>
+                <div class="card accent-mint">
+                    <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>api.open-meteo.com/v1/forecast — chamada direta</div></div>
+                    <div class="cb">
+                        <div class="fr c2">
+                            <div class="f"><label>Latitude</label><input id="omf_lat" placeholder="-23.515" value="-23.515" type="number" step="any"></div>
+                            <div class="f"><label>Longitude</label><input id="omf_lon" placeholder="-46.611" value="-46.611" type="number" step="any"></div>
+                        </div>
+                        <div class="bgrp"><button class="btn b-mint" onclick="callOpenMeteoDirect()">⚡ Chamar Open-Meteo direto</button></div>
+                        <div id="r_omf_direct"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════ ERA5 ARCHIVE PAGE ═══════ -->
+            <div class="page" id="page-era5">
+                <div class="ptitle"><div class="ptitle-icon">📚</div><h2>ERA5 Archive — Carga Histórica</h2><div class="ptitle-line"></div></div>
+                <div class="ptitle-sub">fonte=ERA5_ARCHIVE · dados horários 2020–2024 · idempotente: dias já existentes são ignorados · 1x execução</div>
+                <div class="hint warn">⚠ Operação longa — carrega ~5 anos de dados (1825 dias por fazenda). Execute por fazenda ou fora do horário de pico.</div>
+                <div class="grid">
+                    <div class="card accent-violet">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/dados-orbitais/era5/fazenda/{id}/carregar</div></div>
+                        <div class="cb">
+                            <div class="hint">Carga padrão 2020-01-01 → 2024-12-31. Idempotente — dias já existentes são ignorados silenciosamente.</div>
+                            <div class="f mg"><label>ID da Fazenda</label><input id="era5_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-violet" onclick="req('POST',`/api/dados-orbitais/era5/fazenda/${v('era5_id')}/carregar`,{},'r_era5_pad')">📚 Carregar histórico padrão (2020–2024)</button></div>
+                            <div id="r_era5_pad"></div>
+                        </div>
+                    </div>
+                    <div class="card accent-violet">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/dados-orbitais/era5/fazenda/{id}/carregar/periodo</div></div>
+                        <div class="cb">
+                            <div class="hint">Período customizado — útil para carregar ano a ano em bases grandes</div>
+                            <div class="f"><label>ID da Fazenda</label><input id="era5_cust_id" placeholder="1" type="number"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Data Início</label><input id="era5_start" type="date" value="2023-01-01"></div>
+                                <div class="f"><label>Data Fim</label><input id="era5_end" type="date" value="2023-12-31"></div>
+                            </div>
+                            <div class="bgrp"><button class="btn b-violet" onclick="req('POST',`/api/dados-orbitais/era5/fazenda/${v('era5_cust_id')}/carregar/periodo?startDate=${v('era5_start')}&endDate=${v('era5_end')}`,{},'r_era5_cust')">📅 Carregar período customizado</button></div>
+                            <div id="r_era5_cust"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/dados-orbitais/era5/carregar-todas</div></div>
+                        <div class="cb">
+                            <div class="hint warn">⚠ Itera sobre TODAS as fazendas — operação muito longa. Use apenas para setup inicial.</div>
+                            <div class="bgrp"><button class="btn b-rose" onclick="req('POST','/api/dados-orbitais/era5/carregar-todas',{},'r_era5_all')">⚠ Carregar todas as fazendas</button></div>
+                            <div id="r_era5_all"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sec-label" style="margin-top:8px">Teste direto — Open-Meteo Archive API pública</div>
+                <div class="card accent-violet">
+                    <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>archive-api.open-meteo.com/v1/archive — chamada direta</div></div>
+                    <div class="cb">
+                        <div class="fr c2">
+                            <div class="f"><label>Latitude</label><input id="era_lat" value="-23.515" type="number" step="any"></div>
+                            <div class="f"><label>Longitude</label><input id="era_lon" value="-46.611" type="number" step="any"></div>
+                        </div>
+                        <div class="fr c2 mg">
+                            <div class="f"><label>Data Início</label><input id="era_start" type="date" value="2024-01-01"></div>
+                            <div class="f"><label>Data Fim</label><input id="era_end" type="date" value="2024-01-07"></div>
+                        </div>
+                        <div class="hint mg">⚡ Recomendado: testar período curto (7 dias) para validar a resposta antes da carga completa</div>
+                        <div class="bgrp"><button class="btn b-violet" onclick="callEra5Direct()">📚 Chamar ERA5 Archive direto</button></div>
+                        <div id="r_era5_direct"></div>
                     </div>
                 </div>
             </div>
 
             <!-- ═══════ INMET PAGE ═══════ -->
             <div class="page" id="page-inmet">
-                <div class="page-title">🌦 INMET — Estações Meteorológicas <div class="page-title-line"></div></div>
+                <div class="ptitle"><div class="ptitle-icon">🌦</div><h2>INMET — Estações Meteorológicas BR</h2><div class="ptitle-line"></div></div>
+                <div class="ptitle-sub">BrDadoOrbital · TB_DADO_ORBITAL · scheduler: 01:00 diário · estação padrão: A701 (São Paulo Mirante)</div>
 
-                <div class="card" style="border-color:rgba(0,212,255,.25);background:rgba(0,212,255,.04)">
-                    <div class="card-body" style="display:flex;align-items:flex-start;gap:16px;padding:16px 18px">
-                        <div style="font-size:28px;line-height:1">🏛</div>
-                        <div>
-                            <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:4px">API pública INMET — sem autenticação</div>
-                            <div style="font-size:12px;color:var(--text2);line-height:1.6">
-                                Endpoint: <code style="color:var(--cyan);font-family:var(--mono);font-size:11px">GET https://apitempo.inmet.gov.br/ESTACAO/{inicio}/{fim}/{codEstacao}</code><br>
-                                Chamada direta do browser. Se CORS bloquear, use o trigger manual do backend abaixo.
+                <div class="card" style="border-color:rgba(255,204,2,.2);background:rgba(255,204,2,.02)">
+                    <div class="cb" style="display:flex;align-items:flex-start;gap:16px">
+                        <div style="font-size:26px">🏛</div>
+                        <div style="flex:1">
+                            <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--amber);margin-bottom:6px">INMET API pública — apitempo.inmet.gov.br</div>
+                            <div style="font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.8">
+                                Endpoint: <code style="color:var(--amber)">GET /ESTACAO/{inicio}/{fim}/{codEstacao}</code><br>
+                                Se CORS bloquear requisição direta, use o trigger manual do backend abaixo.<br>
+                                Portal para consultar códigos: <code style="color:var(--cyan)">portal.inmet.gov.br</code>
                             </div>
-                            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-                                <span class="station-pill"><span class="station-pill-dot"></span>A701 — São Paulo (Mirante)</span>
-                                <span style="font-size:11px;color:var(--text3);font-family:var(--mono);align-self:center">portal.inmet.gov.br para outros códigos</span>
+                            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                                <div class="inmet-stat-pill"><div class="inmet-pulse"></div>A701 — São Paulo (Mirante)</div>
+                                <div class="inmet-stat-pill" style="border-color:rgba(0,255,179,.2);color:var(--mint)"><div class="inmet-pulse" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>A652 — Campinas</div>
+                                <div class="inmet-stat-pill" style="border-color:rgba(179,136,255,.2);color:var(--violet)"><div class="inmet-pulse" style="background:var(--violet);box-shadow:0 0 6px var(--violet)"></div>A836 — Rio de Janeiro</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title"><span class="badge m-get">GET</span>apitempo.inmet.gov.br/ESTACAO/{inicio}/{fim}/{codEstacao}</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-row c3">
-                            <div class="field"><label>Código da Estação</label><input id="inmet_cod" value="A701" placeholder="A701"></div>
-                            <div class="field"><label>Data Início</label><input id="inmet_ini" type="date"></div>
-                            <div class="field"><label>Data Fim</label><input id="inmet_fim" type="date"></div>
+                <div class="sec-label">Consulta direta à API INMET</div>
+                <div class="card accent-amber">
+                    <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>apitempo.inmet.gov.br/ESTACAO/{ini}/{fim}/{codEstacao}</div></div>
+                    <div class="cb">
+                        <div class="fr c3">
+                            <div class="f"><label>Código da Estação</label><input id="inmet_cod" value="A701" placeholder="A701"></div>
+                            <div class="f"><label>Data Início</label><input id="inmet_ini" type="date"></div>
+                            <div class="f"><label>Data Fim</label><input id="inmet_fim" type="date"></div>
                         </div>
-                        <div class="hint" style="margin-top:10px">💡 Período máximo recomendado: 30 dias. Leituras horárias (HH00 UTC).</div>
-                        <div class="btn-grp">
-                            <button class="btn btn-cyan" onclick="inmetConsultar()">Consultar INMET</button>
-                            <button class="btn btn-ghost btn-sm" onclick="inmetPreencherOntem()">Preencher ontem</button>
-                            <button class="btn btn-ghost btn-sm" onclick="inmetPreencherSemana()">Última semana</button>
+                        <div class="hint mg">Período máximo recomendado: 30 dias. Dados horários em UTC.</div>
+                        <div class="bgrp">
+                            <button class="btn b-amber" onclick="callInmet()">Consultar INMET</button>
+                            <button class="btn b-ghost" onclick="inmetOntem()">Ontem</button>
+                            <button class="btn b-ghost" onclick="inmetSemana()">Última semana</button>
                         </div>
-                        <div id="res_inmet_raw"></div>
-
+                        <div id="r_inmet_raw"></div>
                         <div id="inmet_painel" style="display:none">
-                            <div style="height:1px;background:var(--border);margin:18px 0"></div>
-                            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+                            <div class="div-sec" style="margin-top:16px"></div>
+                            <div class="inmet-stat-bar">
                                 <div>
-                                    <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)" id="inmet_station_name">—</div>
-                                    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px" id="inmet_station_period">—</div>
+                                    <div style="font-family:var(--sans);font-size:13px;font-weight:700;color:var(--text)" id="inmet_name">—</div>
+                                    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px" id="inmet_period">—</div>
                                 </div>
-                                <div id="inmet_station_pill"></div>
+                                <div id="inmet_pill"></div>
                             </div>
-                            <div style="font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Último registro</div>
-                            <div class="inmet-grid" id="inmet_ultimo_grid"></div>
-                            <div style="margin-top:18px;display:flex;align-items:center;justify-content:space-between">
-                                <div style="font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.8px">Todos os registros (<span id="inmet_count">0</span>)</div>
-                                <button class="btn btn-ghost btn-sm" onclick="toggleInmetTabela()">Expandir tabela</button>
+                            <div style="font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Último registro</div>
+                            <div class="metric-grid" id="inmet_metrics"></div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+                                <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">Total: <span id="inmet_count">0</span> registros</div>
+                                <button class="btn b-ghost" style="font-size:9px;padding:4px 10px" onclick="toggleInmetTabela()">Expandir tabela</button>
                             </div>
-                            <div id="inmet_tabela_wrap" style="display:none;margin-top:10px;overflow-x:auto">
-                                <table id="inmet_tabela" style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px"></table>
+                            <div id="inmet_tabela_wrap" style="display:none;margin-top:10px">
+                                <div class="table-wrap"><table class="inmet-tbl" id="inmet_tabela"></table></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- BACKEND dado-orbital -->
-                <div class="page-title" style="font-size:12px;color:var(--text3);margin-bottom:4px">── Dados salvos no backend (TB_DADO_ORBITAL / InMetSyncScheduler)</div>
-                <div class="card-grid">
+                <div class="sec-label">Dados salvos no backend (InMetSyncScheduler)</div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dado-orbital</div></div>
-                        <div class="card-body">
-                            <div class="hint">Lista todos os registros salvos pelo <code style="color:var(--cyan)">InMetSyncScheduler</code>.</div>
-                            <div class="btn-grp">
-                                <button class="btn btn-cyan" onclick="req('GET','/api/dado-orbital',null,'res_db_all')">Listar todos</button>
-                            </div>
-                            <div id="res_db_all"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/inmet</div></div>
+                        <div class="cb">
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET','/api/dados-orbitais/inmet',null,'r_db_all')">Listar todos</button></div>
+                            <div id="r_db_all"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dado-orbital/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do registro</label><input id="db_get_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-cyan" onclick="req('GET',`/api/dado-orbital/${v('db_get_id')}`,null,'res_db_id')">Buscar</button>
-                            </div>
-                            <div id="res_db_id"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/inmet/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="db_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/inmet/${v('db_id')}`,null,'r_db_id')">Buscar</button></div>
+                            <div id="r_db_id"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dado-orbital/estacao/{cod}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>Código da Estação</label><input id="db_cod" value="A701" placeholder="A701"></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-cyan" onclick="req('GET',`/api/dado-orbital/estacao/${v('db_cod')}`,null,'res_db_estacao')">Buscar por estação</button>
-                            </div>
-                            <div id="res_db_estacao"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/inmet/estacao/{cod}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>Código Estação</label><input id="db_cod" value="A701"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/inmet/estacao/${v('db_cod')}`,null,'r_db_est')">Buscar por estação</button></div>
+                            <div id="r_db_est"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/dado-orbital/estacao/{cod}/periodo</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>Código da Estação</label><input id="db_per_cod" value="A701" placeholder="A701"></div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Início</label><input id="db_per_ini" type="date"></div>
-                                <div class="field"><label>Fim</label><input id="db_per_fim" type="date"></div>
-                            </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-cyan" onclick="req('GET',`/api/dado-orbital/estacao/${v('db_per_cod')}/periodo?inicio=${v('db_per_ini')}&fim=${v('db_per_fim')}`,null,'res_db_per')">Buscar período</button>
-                            </div>
-                            <div id="res_db_per"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/inmet/estacao/{cod}/ultimo</div></div>
+                        <div class="cb">
+                            <div class="f"><label>Código Estação</label><input id="db_ult_cod" value="A701"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/inmet/estacao/${v('db_ult_cod')}/ultimo`,null,'r_db_ult')">Último registro</button></div>
+                            <div id="r_db_ult"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/dado-orbital/sincronizar — Trigger Manual</div></div>
-                        <div class="card-body">
-                            <div class="hint">⚡ Dispara o <code style="color:var(--cyan)">InMetSyncScheduler</code> manualmente sem esperar o cron das 01:00.</div>
-                            <div class="form-row c2" style="margin-top:12px">
-                                <div class="field"><label>Código da Estação</label><input id="db_sync_cod" value="A701" placeholder="A701"></div>
-                                <div class="field"><label>Data (opcional)</label><input id="db_sync_data" type="date"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/dados-orbitais/inmet/estacao/{cod}/periodo</div></div>
+                        <div class="cb">
+                            <div class="f"><label>Código Estação</label><input id="db_per_cod" value="A701"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Início (yyyy-MM-dd)</label><input id="db_per_ini" type="date"></div>
+                                <div class="f"><label>Fim (yyyy-MM-dd)</label><input id="db_per_fim" type="date"></div>
                             </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="req('POST',`/api/dado-orbital/sincronizar`,cleanObj({codEstacao:v('db_sync_cod'),data:v('db_sync_data')}),'res_db_sync')">▶ Sincronizar agora</button>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/dados-orbitais/inmet/estacao/${v('db_per_cod')}/periodo?inicio=${v('db_per_ini')}&fim=${v('db_per_fim')}`,null,'r_db_per')">Buscar período</button></div>
+                            <div id="r_db_per"></div>
+                        </div>
+                    </div>
+                    <div class="card accent-amber">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/dados-orbitais/inmet/sincronizar — trigger manual</div></div>
+                        <div class="cb">
+                            <div class="hint">⚡ Equivale a disparar o <code>InMetSyncScheduler</code> sem esperar o cron das 01:00</div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Código Estação</label><input id="db_sync_cod" value="A701"></div>
+                                <div class="f"><label>Data (opcional)</label><input id="db_sync_data" type="date"></div>
                             </div>
-                            <div id="res_db_sync"></div>
+                            <div class="bgrp"><button class="btn b-amber" onclick="req('POST','/api/dados-orbitais/inmet/sincronizar',clean({codEstacao:v('db_sync_cod'),data:v('db_sync_data')}),'r_db_sync')">▶ Sincronizar agora</button></div>
+                            <div id="r_db_sync"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-del">DELETE</span>/api/dado-orbital/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do registro</label><input id="db_del_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp">
-                                <button class="btn btn-red" onclick="req('DELETE',`/api/dado-orbital/${v('db_del_id')}`,null,'res_db_del')">Deletar registro</button>
-                            </div>
-                            <div id="res_db_del"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-del">DELETE</span>/api/dados-orbitais/inmet/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID</label><input id="db_del_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-rose" onclick="req('DELETE',`/api/dados-orbitais/inmet/${v('db_del_id')}`,null,'r_db_del')">Deletar registro</button></div>
+                            <div id="r_db_del"></div>
                         </div>
                     </div>
                 </div>
@@ -728,121 +946,124 @@
 
             <!-- ═══════ MARKETPLACE PAGE ═══════ -->
             <div class="page" id="page-marketplace">
-                <div class="page-title">🏪 Marketplace <div class="page-title-line"></div></div>
+                <div class="ptitle"><div class="ptitle-icon">🏪</div><h2>Marketplace</h2><div class="ptitle-line"></div></div>
 
-                <div class="page-title" style="font-size:12px;color:var(--text3);margin-bottom:4px">── Lotes de Biomassa</div>
-                <div class="card-grid">
+                <div class="sec-label">Lotes de Biomassa</div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/lotes</div></div>
-                        <div class="card-body">
-                            <div class="btn-grp">
-                                <button class="btn btn-cyan" onclick="req('GET','/api/marketplace/lotes',null,'res_mk_lotes')">Listar lotes</button>
-                                <button class="btn btn-ghost" onclick="req('GET','/api/marketplace/lotes/disponiveis',null,'res_mk_lotes')">Apenas disponíveis</button>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/marketplace/lotes</div></div>
+                        <div class="cb">
+                            <div class="bgrp">
+                                <button class="btn b-cyan" onclick="req('GET','/api/marketplace/lotes',null,'r_mk_lotes')">Listar todos</button>
+                                <button class="btn b-ghost" onclick="req('GET','/api/marketplace/lotes/disponiveis',null,'r_mk_lotes')">Disponíveis</button>
                             </div>
-                            <div id="res_mk_lotes"></div>
+                            <div id="r_mk_lotes"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/lotes/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do lote</label><input id="mk_lote_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/marketplace/lotes/${v('mk_lote_id')}`,null,'res_mk_lote')">Buscar</button></div>
-                            <div id="res_mk_lote"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/marketplace/lotes/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID do Lote</label><input id="mk_lote_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/marketplace/lotes/${v('mk_lote_id')}`,null,'r_mk_lote')">Buscar</button></div>
+                            <div id="r_mk_lote"></div>
+                        </div>
+                    </div>
+                    <div class="card accent-mint">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/marketplace/lotes</div></div>
+                        <div class="cb">
+                            <div class="fr c2">
+                                <div class="f"><label>ID Fazenda</label><input id="mk_l_fid" placeholder="1" type="number"></div>
+                                <div class="f"><label>ID Tanque</label><input id="mk_l_tid" placeholder="1" type="number"></div>
+                            </div>
+                            <div class="f mg"><label>Taxonomia da Alga</label><input id="mk_l_taxa" placeholder="Spirulina platensis"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Peso (kg)</label><input id="mk_l_peso" placeholder="500.00" type="number" step="0.01"></div>
+                                <div class="f"><label>Preço unitário (R$)</label><input id="mk_l_preco" placeholder="25.00" type="number" step="0.01"></div>
+                            </div>
+                            <div class="bgrp"><button class="btn b-mint" onclick="reqPublicarLote()">Publicar lote</button></div>
+                            <div id="r_mk_l_post"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/marketplace/lotes</div></div>
-                        <div class="card-body">
-                            <div class="form-row c2">
-                                <div class="field"><label>ID Fazenda</label><input id="mk_l_fid" placeholder="1" type="number"></div>
-                                <div class="field"><label>ID Tanque</label><input id="mk_l_tid" placeholder="1" type="number"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-patch">PATCH</span>/api/marketplace/lotes/{id}/status · <span class="mb mg-del">DEL</span></div></div>
+                        <div class="cb">
+                            <div class="fr c2">
+                                <div class="f"><label>ID Lote</label><input id="mk_ls_id" placeholder="1" type="number"></div>
+                                <div class="f"><label>Status</label><select id="mk_ls_st"><option value="DISPONIVEL">DISPONIVEL</option><option value="VENDIDO">VENDIDO</option><option value="CANCELADO">CANCELADO</option></select></div>
                             </div>
-                            <div class="field" style="margin-top:10px"><label>Taxonomia da Alga</label><input id="mk_l_taxa" placeholder="Spirulina platensis"></div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Peso (kg)</label><input id="mk_l_peso" placeholder="500.00" type="number" step="0.01"></div>
-                                <div class="field"><label>Preço unitário (R$)</label><input id="mk_l_preco" placeholder="25.00" type="number" step="0.01"></div>
+                            <div class="bgrp">
+                                <button class="btn b-blue" onclick="req('PATCH',`/api/marketplace/lotes/${v('mk_ls_id')}/status`,{status:v('mk_ls_st')},'r_mk_ls')">Atualizar status</button>
+                                <button class="btn b-rose" onclick="req('DELETE',`/api/marketplace/lotes/${v('mk_ls_id')}`,null,'r_mk_ls')">Deletar</button>
                             </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="reqPublicarLote()">Publicar lote</button>
-                            </div>
-                            <div id="res_mk_l_post"></div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-patch">PATCH</span>/api/marketplace/lotes/{id}/status</div></div>
-                        <div class="card-body">
-                            <div class="form-row c2">
-                                <div class="field"><label>ID do lote</label><input id="mk_ls_id" placeholder="1" type="number"></div>
-                                <div class="field"><label>Status</label><select id="mk_ls_status"><option value="DISPONIVEL">DISPONIVEL</option><option value="VENDIDO">VENDIDO</option><option value="CANCELADO">CANCELADO</option></select></div>
-                            </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-amber" onclick="req('PATCH',`/api/marketplace/lotes/${v('mk_ls_id')}/status`,{status:v('mk_ls_status')},'res_mk_ls')">Atualizar status</button>
-                                <button class="btn btn-red btn-sm" onclick="req('DELETE',`/api/marketplace/lotes/${v('mk_ls_id')}`,null,'res_mk_ls')">Deletar</button>
-                            </div>
-                            <div id="res_mk_ls"></div>
+                            <div id="r_mk_ls"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="page-title" style="font-size:12px;color:var(--text3);margin-top:8px;margin-bottom:4px">── Créditos de Carbono</div>
-                <div class="card-grid">
+                <div class="sec-label" style="margin-top:8px">Créditos de Carbono</div>
+                <div class="grid">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/creditos</div></div>
-                        <div class="card-body">
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET','/api/marketplace/creditos',null,'res_mk_creds')">Listar créditos</button></div>
-                            <div id="res_mk_creds"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/marketplace/creditos</div></div>
+                        <div class="cb">
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET','/api/marketplace/creditos',null,'r_mk_creds')">Listar créditos</button></div>
+                            <div id="r_mk_creds"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/creditos/fazenda/{id}</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID da fazenda</label><input id="mk_cf_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-cyan" onclick="req('GET',`/api/marketplace/creditos/fazenda/${v('mk_cf_id')}`,null,'res_mk_cf')">Extrato CO₂</button></div>
-                            <div id="res_mk_cf"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/marketplace/creditos/fazenda/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID Fazenda</label><input id="mk_cf_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/marketplace/creditos/fazenda/${v('mk_cf_id')}`,null,'r_mk_cf')">Extrato CO₂</button></div>
+                            <div id="r_mk_cf"></div>
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-patch">PATCH</span>/api/marketplace/creditos/{id}/validar</div></div>
-                        <div class="card-body">
-                            <div class="field"><label>ID do crédito</label><input id="mk_cv_id" placeholder="1" type="number"></div>
-                            <div class="btn-grp"><button class="btn btn-amber" onclick="req('PATCH',`/api/marketplace/creditos/${v('mk_cv_id')}/validar`,{},'res_mk_cv')">Validar crédito</button></div>
-                            <div id="res_mk_cv"></div>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/marketplace/creditos/{id}</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID Crédito</label><input id="mk_cred_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="req('GET',`/api/marketplace/creditos/${v('mk_cred_id')}`,null,'r_mk_cred_id')">Buscar</button></div>
+                            <div id="r_mk_cred_id"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-patch">PATCH</span>/api/marketplace/creditos/{id}/validar</div></div>
+                        <div class="cb">
+                            <div class="f"><label>ID Crédito</label><input id="mk_cv_id" placeholder="1" type="number"></div>
+                            <div class="bgrp"><button class="btn b-amber" onclick="req('PATCH',`/api/marketplace/creditos/${v('mk_cv_id')}/validar`,{},'r_mk_cv')">Validar crédito</button></div>
+                            <div id="r_mk_cv"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="page-title" style="font-size:12px;color:var(--text3);margin-top:8px;margin-bottom:4px">── Transações</div>
-                <div class="card-grid">
+                <div class="sec-label" style="margin-top:8px">Transações</div>
+                <div class="grid g2">
                     <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-get">GET</span>/api/marketplace/transacoes</div></div>
-                        <div class="card-body">
-                            <div class="btn-grp">
-                                <button class="btn btn-cyan" onclick="req('GET','/api/marketplace/transacoes',null,'res_mk_trans')">Listar todas</button>
-                                <button class="btn btn-ghost" onclick="req('GET','/api/marketplace/transacoes/minhas',null,'res_mk_trans')">Minhas transações</button>
+                        <div class="ch"><div class="ch-title"><span class="mb mg-get">GET</span>/api/marketplace/transacoes</div></div>
+                        <div class="cb">
+                            <div class="bgrp">
+                                <button class="btn b-cyan" onclick="req('GET','/api/marketplace/transacoes',null,'r_mk_trans')">Todas</button>
+                                <button class="btn b-ghost" onclick="req('GET','/api/marketplace/transacoes/minhas',null,'r_mk_trans')">Minhas</button>
                             </div>
-                            <div id="res_mk_trans"></div>
+                            <div id="r_mk_trans"></div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-header"><div class="card-title"><span class="badge m-post">POST</span>/api/marketplace/transacoes</div></div>
-                        <div class="card-body">
-                            <div class="hint">O ID do comprador é extraído do JWT automaticamente.</div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>ID Lote (opcional)</label><input id="mk_t_lote" placeholder="1" type="number"></div>
-                                <div class="field"><label>ID Crédito (opcional)</label><input id="mk_t_cred" placeholder="1" type="number"></div>
+                    <div class="card accent-cyan">
+                        <div class="ch"><div class="ch-title"><span class="mb mg-post">POST</span>/api/marketplace/transacoes</div></div>
+                        <div class="cb">
+                            <div class="hint">O ID do comprador é extraído do JWT automaticamente</div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>ID Lote (opcional)</label><input id="mk_t_lote" placeholder="1" type="number"></div>
+                                <div class="f"><label>ID Crédito (opcional)</label><input id="mk_t_cred" placeholder="1" type="number"></div>
                             </div>
-                            <div class="field" style="margin-top:10px">
-                                <label>Tipo de transação</label>
+                            <div class="f mg"><label>Tipo de Transação</label>
                                 <select id="mk_t_tipo"><option value="COMPRA_BIOMASSA">COMPRA_BIOMASSA</option><option value="COMPRA_CREDITO_CARBONO">COMPRA_CREDITO_CARBONO</option></select>
                             </div>
-                            <div class="form-row c2" style="margin-top:10px">
-                                <div class="field"><label>Quantidade</label><input id="mk_t_qtd" placeholder="10" type="number" step="0.01"></div>
-                                <div class="field"><label>Valor total (R$)</label><input id="mk_t_val" placeholder="250.00" type="number" step="0.01"></div>
+                            <div class="fr c2 mg">
+                                <div class="f"><label>Quantidade</label><input id="mk_t_qtd" placeholder="10" type="number" step="0.01"></div>
+                                <div class="f"><label>Valor total (R$)</label><input id="mk_t_val" placeholder="250.00" type="number" step="0.01"></div>
                             </div>
-                            <div class="btn-grp">
-                                <button class="btn btn-green" onclick="reqTransacao()">Realizar transação</button>
-                            </div>
-                            <div id="res_mk_t_post"></div>
+                            <div class="bgrp"><button class="btn b-cyan" onclick="reqTransacao()">Realizar transação</button></div>
+                            <div id="r_mk_t_post"></div>
                         </div>
                     </div>
                 </div>
@@ -850,398 +1071,296 @@
 
         </div><!-- /content -->
     </div><!-- /layout -->
-</div><!-- /appScreen -->
+</div><!-- /app -->
 
 <script>
-    /* ═══════════════════════════════════════════════════════
+    /* ─────────────────────────────
        STATE
-    ═══════════════════════════════════════════════════════ */
+    ───────────────────────────── */
     let JWT  = '';
     let BASE = 'http://localhost:8080';
 
-    /* ═══════════════════════════════════════════════════════
+    /* ─────────────────────────────
        HELPERS
-    ═══════════════════════════════════════════════════════ */
-    const v   = id => (document.getElementById(id)?.value ?? '').trim();
-    const lng = id => { const x = parseInt(document.getElementById(id)?.value); return isNaN(x) ? null : x; };
-    const dec = id => { const x = parseFloat(document.getElementById(id)?.value); return isNaN(x) ? null : x; };
-    const el  = id => document.getElementById(id);
+    ───────────────────────────── */
+    const $  = id => document.getElementById(id);
+    const v  = id => ($( id)?.value ?? '').trim();
+    const lng= id => { const x=parseInt($( id)?.value); return isNaN(x)?null:x; };
+    const dec= id => { const x=parseFloat($( id)?.value); return isNaN(x)?null:x; };
 
-    /** Remove keys that are empty-string, null or undefined so Java @Valid doesn't fail */
-    function cleanObj(obj) {
+    function clean(obj) {
         return Object.fromEntries(
-            Object.entries(obj).filter(([, val]) => val !== undefined && val !== null && val !== '')
+            Object.entries(obj).filter(([,v]) => v!==undefined && v!==null && v!=='')
         );
     }
 
-    function syncBase(val) {
-        BASE = val.replace(/\/$/, '');
-        el('authBase').value = BASE;
-    }
-
-    /* ── init dates ── */
-    (function () {
+    /* ─────────────────────────────
+       INIT DATES
+    ───────────────────────────── */
+    (function(){
         const fmt = d => d.toISOString().split('T')[0];
-        const today = new Date();
-        const ontem = new Date(today); ontem.setDate(today.getDate() - 1);
-        const semana = new Date(today); semana.setDate(today.getDate() - 7);
-        el('inmet_ini').value    = fmt(semana);
-        el('inmet_fim').value    = fmt(ontem);
-        el('db_per_ini').value   = fmt(semana);
-        el('db_per_fim').value   = fmt(ontem);
-        el('db_sync_data').value = fmt(ontem);
-        el('o_per_ini').value    = fmt(semana);
-        el('o_per_fim').value    = fmt(ontem);
+        const t   = new Date();
+        const y   = new Date(t); y.setDate(t.getDate()-1);
+        const w   = new Date(t); w.setDate(t.getDate()-7);
+        ['inmet_ini','db_per_ini','nasa_per_ini'].forEach(id => { const el=$( id); if(el) el.value=fmt(w); });
+        ['inmet_fim','db_per_fim','db_sync_data','nasa_per_fim'].forEach(id => { const el=$( id); if(el) el.value=fmt(y); });
     })();
 
-    /* ═══════════════════════════════════════════════════════
+    /* ─────────────────────────────
        CORE HTTP
-    ═══════════════════════════════════════════════════════ */
-    async function req(method, path, body, resId, auth = true) {
-        const base    = (el('appBase')?.value || BASE).replace(/\/$/, '');
-        const headers = { 'Content-Type': 'application/json' };
-        if (auth && JWT) headers['Authorization'] = `Bearer ${JWT}`;
-
-        const opts = { method, headers };
-        if (body !== null && body !== undefined && method !== 'GET' && method !== 'DELETE') {
-            opts.body = JSON.stringify(body);
-        }
-
+    ───────────────────────────── */
+    async function req(method, path, body, resId, auth=true) {
+        const base = ($('appBase')?.value||BASE).replace(/\/$/,'');
+        const hdrs = {'Content-Type':'application/json'};
+        if(auth && JWT) hdrs['Authorization'] = `Bearer ${JWT}`;
+        const opts = {method, headers:hdrs};
+        if(body && method!=='GET' && method!=='DELETE') opts.body = JSON.stringify(body);
         const t0 = performance.now();
         try {
-            const r  = await fetch(base + path, opts);
-            const ct = r.headers.get('content-type') || '';
+            const r  = await fetch(base+path, opts);
+            const ct = r.headers.get('content-type')||'';
             let txt;
-            if (ct.includes('json')) {
-                const d = await r.json(); txt = JSON.stringify(d, null, 2);
-            } else {
-                txt = await r.text();
+            if(ct.includes('json')){ const d=await r.json(); txt=JSON.stringify(d,null,2); }
+            else { txt=await r.text(); }
+            showRes(resId, r.status, txt||'(sem conteúdo)', t0);
+            if(r.status===401){
+                $( resId).insertAdjacentHTML('beforeend',
+                    '<div style="font-family:var(--mono);font-size:9px;color:var(--amber);margin-top:6px">⚠ 401 — Token ausente ou expirado. Faça login novamente.</div>');
             }
-            showRes(resId, r.status, txt || '(sem conteúdo)', t0);
-            if (r.status === 401) {
-                el(resId).insertAdjacentHTML('beforeend',
-                    '<div style="font-size:10px;color:var(--amber);margin-top:6px;font-family:var(--mono)">⚠ 401 — Token ausente, expirado ou sem permissão. Faça o login novamente.</div>');
-            }
-        } catch (e) {
+        } catch(e){
             showRes(resId, 0,
-                `Erro de conexão: ${e.message}\n\n` +
-                `→ Verifique se a API está rodando em ${base}\n` +
-                `→ Confirme que o CORS está habilitado no backend (CorsConfig.java)`,
+                `Erro de conexão: ${e.message}\n\n→ API em: ${base}\n→ Verifique CorsConfig.java e @EnableScheduling`,
                 t0);
         }
     }
 
-    /* ═══════════════════════════════════════════════════════
-       COMPLEX REQUESTS (need custom body assembly)
-    ═══════════════════════════════════════════════════════ */
-    function reqRegister() {
-        const body = cleanObj({
-            nome: v('ar_nome'), email: v('ar_email'),
-            senha: v('ar_senha'), telefone: v('ar_telefone'),
-            nomePerfil: v('ar_nomePerfil')
-        });
-        req('POST', '/api/auth/register', body, 'res_ar', false);
+    /* ─────────────────────────────
+       EXTERNAL API CALLS
+    ───────────────────────────── */
+    async function callNasaDirect(){
+        const lat=v('np_lat'), lon=v('np_lon'), s=v('np_start'), e=v('np_end');
+        const url=`https://power.larc.nasa.gov/api/temporal/daily/point?parameters=ALLSKY_SFC_PAR_TOT,CLOUD_AMT,T2M,RH2M&community=AG&longitude=${lon}&latitude=${lat}&start=${s}&end=${e}&format=JSON`;
+        const t0=performance.now();
+        try{
+            const r=await fetch(url);
+            const d=await r.json();
+            showRes('r_nasa_direct', r.status, JSON.stringify(d,null,2), t0);
+        } catch(e){ showRes('r_nasa_direct', 0, `Erro: ${e.message}`, t0); }
     }
 
-    function reqCriarTanque() {
-        const body = cleanObj({
-            idFazenda:       lng('t_fid'),
-            codigoTanque:    v('t_cod'),
-            tipoAlga:        v('t_alga'),
-            capacidadeLitros:dec('t_cap'),
-            phMin:           dec('t_phmin'),
-            phMax:           dec('t_phmax'),
-            temperaturaMin:  dec('t_tmin'),
-            temperaturaMax:  dec('t_tmax'),
-            dtInstalacao:    v('t_dt')
-        });
-        req('POST', '/api/tanques', body, 'res_t_post');
+    async function callOpenMeteoDirect(){
+        const lat=v('omf_lat'), lon=v('omf_lon');
+        const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation,cloud_cover,temperature_2m,relative_humidity_2m&forecast_days=2&timezone=America%2FSao_Paulo`;
+        const t0=performance.now();
+        try{
+            const r=await fetch(url);
+            const d=await r.json();
+            showRes('r_omf_direct', r.status, JSON.stringify(d,null,2), t0);
+        } catch(e){ showRes('r_omf_direct', 0, `Erro: ${e.message}`, t0); }
     }
 
-    function reqAtualizarTanque() {
-        const body = cleanObj({
-            tipoAlga:         v('t_put_alga'),
-            capacidadeLitros: dec('t_put_cap'),
-            phMin:            dec('t_put_phmin'),
-            phMax:            dec('t_put_phmax'),
-            status:           v('t_put_status')
-        });
-        req('PUT', `/api/tanques/${v('t_put_id')}`, body, 'res_t_put');
+    async function callEra5Direct(){
+        const lat=v('era_lat'), lon=v('era_lon'), s=v('era_start'), e=v('era_end');
+        const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${s}&end_date=${e}&hourly=shortwave_radiation,cloud_cover,temperature_2m,relative_humidity_2m&timezone=America%2FSao_Paulo`;
+        const t0=performance.now();
+        try{
+            const r=await fetch(url);
+            const d=await r.json();
+            showRes('r_era5_direct', r.status, JSON.stringify(d,null,2), t0);
+        } catch(e){ showRes('r_era5_direct', 0, `Erro: ${e.message}`, t0); }
     }
 
-    function reqPublicarLote() {
-        const body = cleanObj({
-            idFazenda:      lng('mk_l_fid'),
-            idTanque:       lng('mk_l_tid'),
-            taxonomiaAlga:  v('mk_l_taxa'),
-            pesoKg:         dec('mk_l_peso'),
-            precoUnitario:  dec('mk_l_preco')
-        });
-        req('POST', '/api/marketplace/lotes', body, 'res_mk_l_post');
-    }
-
-    function reqTransacao() {
-        const body = cleanObj({
-            idLote:          lng('mk_t_lote'),
-            idCredito:       lng('mk_t_cred'),
-            tipoTransacao:   v('mk_t_tipo'),
-            quantidade:      dec('mk_t_qtd'),
-            valorTotal:      dec('mk_t_val')
-        });
-        req('POST', '/api/marketplace/transacoes', body, 'res_mk_t_post');
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       AUTH SCREEN LOGIC
-    ═══════════════════════════════════════════════════════ */
-    function switchAuthTab(t) {
-        el('loginForm').style.display    = t === 'login'    ? '' : 'none';
-        el('registerForm').style.display = t === 'register' ? '' : 'none';
-        document.querySelectorAll('.auth-tab').forEach((b, i) =>
-            b.classList.toggle('active', (i === 0 && t === 'login') || (i === 1 && t === 'register'))
-        );
-    }
-
-    function showMsg(id, type, text) {
-        const e = el(id);
-        e.textContent = text;
-        e.className   = `msg ${type} visible`;
-        setTimeout(() => e.classList.remove('visible'), 6000);
-    }
-
-    function fmtErr(d) {
-        if (!d) return 'Erro desconhecido';
-        if (typeof d === 'string') return d;
-        if (d.fields) return 'Validation → ' + Object.entries(d.fields).map(([k, v]) => `${k}: ${v}`).join(' | ');
-        return d.message || d.error || d.erro || JSON.stringify(d);
-    }
-
-    async function doRegister() {
-        BASE = el('authBase').value.replace(/\/$/, '');
-        const body = cleanObj({
-            nome: v('regNome'), email: v('regEmail'),
-            senha: v('regPass'), telefone: v('regTelefone'),
-            nomePerfil: v('regNomePerfil')
-        });
-        try {
-            const r = await fetch(`${BASE}/api/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const d = await r.json();
-            if (r.ok) showMsg('registerMsg', 'success', '✓ Conta criada! Agora faça o login.');
-            else showMsg('registerMsg', 'error', fmtErr(d));
-        } catch (e) { showMsg('registerMsg', 'error', 'Erro de conexão: ' + e.message); }
-    }
-
-    async function doLogin() {
-        BASE = el('authBase').value.replace(/\/$/, '');
-        const body = { email: v('loginEmail'), senha: v('loginPass') };
-        try {
-            const r = await fetch(`${BASE}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const d = await r.json();
-            const token = d.token || d.accessToken || d.jwtToken || d.jwt;
-            if (r.ok && token) {
-                JWT = token;
-                el('userNameBadge').textContent = d.email || d.nome || v('loginEmail');
-                el('userRoleBadge').textContent = d.perfil || d.role || d.nomePerfil
-                    ? `[${d.perfil || d.role || d.nomePerfil}]` : '';
-                el('appBase').value = BASE;
-                el('authScreen').style.display = 'none';
-                el('appScreen').style.display  = 'flex';
-                updateTokenDisplay();
-            } else {
-                showMsg('loginMsg', 'error', fmtErr(d) || 'Login falhou. Verifique as credenciais.');
-            }
-        } catch (e) { showMsg('loginMsg', 'error', 'Erro de conexão: ' + e.message); }
-    }
-
-    /* ── In-app login (Auth page) ── */
-    async function reqLogin() {
-        BASE = (el('appBase')?.value || BASE).replace(/\/$/, '');
-        const body = { email: v('al_email'), senha: v('al_senha') };
-        const t0   = performance.now();
-        try {
-            const r = await fetch(`${BASE}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const d = await r.json();
-            const token = d.token || d.accessToken || d.jwtToken || d.jwt;
-            if (r.ok && token) {
-                JWT = token;
-                el('userNameBadge').textContent = d.email || d.nome || v('al_email');
-                el('userRoleBadge').textContent = d.perfil || d.role || d.nomePerfil
-                    ? `[${d.perfil || d.role || d.nomePerfil}]` : '';
-                updateTokenDisplay();
-            }
-            showRes('res_al', r.status, JSON.stringify(d, null, 2), t0);
-        } catch (e) { showRes('res_al', 0, 'Erro: ' + e.message, t0); }
-    }
-
-    function doLogout() {
-        JWT = '';
-        updateTokenDisplay();
-        el('authScreen').style.display = 'flex';
-        el('appScreen').style.display  = 'none';
-    }
-
-    function updateTokenDisplay() {
-        const td = el('tokenDisplay');
-        if (JWT) { td.textContent = JWT; td.classList.add('has-token'); }
-        else { td.textContent = 'Nenhum token salvo — faça o login acima.'; td.classList.remove('has-token'); }
-    }
-
-    function copyToken() { if (JWT) navigator.clipboard.writeText(JWT).catch(() => {}); }
-    function clearToken() { JWT = ''; updateTokenDisplay(); }
-
-    /* ═══════════════════════════════════════════════════════
-       RESPONSE RENDERING
-    ═══════════════════════════════════════════════════════ */
-    function showRes(id, status, text, t0) {
-        const ms = Math.round(performance.now() - t0);
-        let cls  = 's0';
-        if (status >= 200 && status < 300) cls = 's2xx';
-        else if (status >= 400 && status < 500) cls = 's4xx';
-        else if (status >= 500) cls = 's5xx';
-        const label = status === 0 ? 'ERR' : String(status);
-        el(id).innerHTML =
-            `<div class="res-box">` +
-            `<div class="res-head">` +
-            `<span class="res-status ${cls}">${label}</span>` +
-            `<span class="res-time">${ms}ms</span>` +
-            `<button class="res-copy" onclick="navigator.clipboard.writeText(this.closest('.res-box').querySelector('pre').textContent).catch(()=>{})">copiar</button>` +
-            `</div><pre class="res-body">${syntaxHL(text)}</pre></div>`;
-    }
-
-    function syntaxHL(json) {
-        const s = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return s.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
-            let c = 'jn';
-            if (/^"/.test(m)) c = /:$/.test(m) ? 'jk' : 'js';
-            else if (/true|false/.test(m)) c = 'jb';
-            else if (/null/.test(m)) c = 'je';
-            return `<span class="${c}">${m}</span>`;
-        });
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       NAVIGATION
-    ═══════════════════════════════════════════════════════ */
-    function goPage(name) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        el('page-' + name)?.classList.add('active');
-        document.querySelector(`[data-page="${name}"]`)?.classList.add('active');
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       INMET DIRECT CALL
-    ═══════════════════════════════════════════════════════ */
-    function inmetPreencherOntem() {
-        const fmt = d => d.toISOString().split('T')[0];
-        const ontem = new Date(); ontem.setDate(ontem.getDate() - 1);
-        el('inmet_ini').value = fmt(ontem);
-        el('inmet_fim').value = fmt(ontem);
-    }
-
-    function inmetPreencherSemana() {
-        const fmt = d => d.toISOString().split('T')[0];
-        const hoje = new Date();
-        const fim  = new Date(hoje); fim.setDate(hoje.getDate() - 1);
-        const ini  = new Date(hoje); ini.setDate(hoje.getDate() - 7);
-        el('inmet_ini').value = fmt(ini);
-        el('inmet_fim').value = fmt(fim);
-    }
-
-    async function inmetConsultar() {
-        const cod = v('inmet_cod') || 'A701';
-        const ini = v('inmet_ini');
-        const fim = v('inmet_fim');
-        if (!ini || !fim) { showRes('res_inmet_raw', 0, 'Preencha as datas de início e fim.', performance.now()); return; }
-
-        const url = `https://apitempo.inmet.gov.br/ESTACAO/${ini}/${fim}/${cod}`;
-        const t0  = performance.now();
-        el('inmet_painel').style.display = 'none';
-
-        try {
-            const r  = await fetch(url, { headers: { 'Accept': 'application/json' } });
-            const ct = r.headers.get('content-type') || '';
+    async function callInmet(){
+        const cod=v('inmet_cod')||'A701';
+        const ini=v('inmet_ini'), fim=v('inmet_fim');
+        if(!ini||!fim){ showRes('r_inmet_raw',0,'Preencha datas de início e fim.',performance.now()); return; }
+        const url=`https://apitempo.inmet.gov.br/ESTACAO/${ini}/${fim}/${cod}`;
+        const t0=performance.now();
+        $('inmet_painel').style.display='none';
+        try{
+            const r=await fetch(url,{headers:{'Accept':'application/json'}});
+            const ct=r.headers.get('content-type')||'';
             let data, txt;
-            if (ct.includes('json')) { data = await r.json(); txt = JSON.stringify(data, null, 2); }
-            else { txt = await r.text(); data = null; }
-
-            showRes('res_inmet_raw', r.status, txt || '(sem conteúdo)', t0);
-            if (r.ok && Array.isArray(data) && data.length > 0) renderInmetPainel(data, cod, ini, fim);
-
-        } catch (e) {
-            showRes('res_inmet_raw', 0,
-                `Erro de conexão com a API INMET: ${e.message}\n\n` +
-                `→ A API do INMET pode bloquear requisições do browser por política de CORS.\n` +
-                `→ Use o botão "Sincronizar agora" no backend (InMetSyncScheduler) como alternativa.`, t0);
+            if(ct.includes('json')){ data=await r.json(); txt=JSON.stringify(data,null,2); }
+            else { txt=await r.text(); data=null; }
+            showRes('r_inmet_raw', r.status, txt||'(sem conteúdo)', t0);
+            if(r.ok && Array.isArray(data) && data.length>0) renderInmetPainel(data,cod,ini,fim);
+        } catch(e){
+            showRes('r_inmet_raw', 0,
+                `Erro de conexão com INMET: ${e.message}\n\n→ API INMET pode bloquear CORS no browser.\n→ Use o trigger manual do backend (/api/dados-orbitais/inmet/sincronizar) como alternativa.`,
+                t0);
         }
     }
 
-    function renderInmetPainel(data, cod, ini, fim) {
-        const ultimo = data[data.length - 1];
-        el('inmet_station_name').textContent   = (ultimo.DC_NOME || cod) + ' — ' + cod;
-        el('inmet_station_period').textContent = `${ini} → ${fim} · ${data.length} registros`;
-        el('inmet_station_pill').innerHTML =
-            `<span class="station-pill"><span class="station-pill-dot"></span>${cod}</span>`;
-
-        const campos = [
-            { key: 'TEM_MAX', label: 'Temp. Máx',   unit: '°C'    },
-            { key: 'TEM_MIN', label: 'Temp. Mín',   unit: '°C'    },
-            { key: 'TEM_MED', label: 'Temp. Média', unit: '°C'    },
-            { key: 'UMD_MED', label: 'Umidade',     unit: '%'     },
-            { key: 'CHUVA',   label: 'Chuva',       unit: 'mm'    },
-            { key: 'VEN_VEL', label: 'Vento',       unit: 'm/s'   },
-            { key: 'VEN_DIR', label: 'Dir. Vento',  unit: '°'     },
-            { key: 'PRE_INS', label: 'Pressão',     unit: 'hPa'   },
-            { key: 'RAD_GLO', label: 'Radiação',    unit: 'kJ/m²' },
+    /* ─────────────────────────────
+       INMET PANEL
+    ───────────────────────────── */
+    function renderInmetPainel(data, cod, ini, fim){
+        const ult=data[data.length-1];
+        $('inmet_name').textContent=(ult.DC_NOME||cod)+' — '+cod;
+        $('inmet_period').textContent=`${ini} → ${fim} · ${data.length} registros`;
+        $('inmet_pill').innerHTML=`<div class="inmet-stat-pill"><div class="inmet-pulse"></div>${cod}</div>`;
+        const campos=[
+            {k:'TEM_MAX',l:'T° Máx',u:'°C'},{k:'TEM_MIN',l:'T° Mín',u:'°C'},{k:'TEM_MED',l:'T° Média',u:'°C'},
+            {k:'UMD_MED',l:'Umidade',u:'%'},{k:'CHUVA',l:'Chuva',u:'mm'},{k:'VEN_VEL',l:'Vento',u:'m/s'},
+            {k:'VEN_DIR',l:'Dir.Vento',u:'°'},{k:'PRE_INS',l:'Pressão',u:'hPa'},{k:'RAD_GLO',l:'Radiação',u:'kJ/m²'},
         ];
-
-        el('inmet_ultimo_grid').innerHTML = campos.map(c => {
-            const val  = ultimo[c.key];
-            const disp = (val !== null && val !== undefined && val !== '') ? val : '—';
-            return `<div class="inmet-kv">
-            <div class="inmet-kv-label">${c.label}</div>
-            <div class="inmet-kv-val">${disp}<span class="inmet-kv-unit">${disp !== '—' ? c.unit : ''}</span></div>
-        </div>`;
+        $('inmet_metrics').innerHTML=campos.map(c=>{
+            const val=ult[c.k]; const d=(val!==null&&val!==undefined&&val!=='') ? val : '—';
+            return `<div class="metric"><div class="metric-lbl">${c.l}</div><div class="metric-val">${d}<span class="metric-unit">${d!=='—'?c.u:''}</span></div></div>`;
         }).join('');
-
-        const cols  = ['DT_MEDICAO','HR_MEDICAO','TEM_MAX','TEM_MIN','TEM_MED','UMD_MED','CHUVA','VEN_VEL','PRE_INS','RAD_GLO'];
-        const heads = ['Data','Hora','Tmáx','Tmín','Tméd','Umid%','Chuva','Vento','Pressão','Rad.'];
-        let html = `<thead><tr>${heads.map(h =>
-            `<th style="padding:5px 8px;text-align:left;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap">${h}</th>`
-        ).join('')}</tr></thead><tbody>`;
-
-        data.forEach((row, i) => {
-            const bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,.02)';
-            html += `<tr style="background:${bg}">` +
-                cols.map(c => {
-                    const val = (row[c] !== null && row[c] !== undefined && row[c] !== '') ? row[c] : '—';
-                    return `<td style="padding:4px 8px;color:var(--text2);white-space:nowrap">${val}</td>`;
-                }).join('') + '</tr>';
+        const cols=['DT_MEDICAO','HR_MEDICAO','TEM_MAX','TEM_MIN','TEM_MED','UMD_MED','CHUVA','VEN_VEL','PRE_INS','RAD_GLO'];
+        const heads=['Data','Hora','T°Máx','T°Mín','T°Méd','Umid%','Chuva','Vento','Pressão','Rad.'];
+        let html=`<thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+        data.forEach((row,i)=>{
+            html+=`<tr>${cols.map(c=>{
+                const val=(row[c]!==null&&row[c]!==undefined&&row[c]!=='') ? row[c] : '—';
+                return `<td>${val}</td>`;
+            }).join('')}</tr>`;
         });
-        html += '</tbody>';
-        el('inmet_tabela').innerHTML = html;
-        el('inmet_count').textContent = data.length;
-        el('inmet_painel').style.display = 'block';
+        html+='</tbody>';
+        $('inmet_tabela').innerHTML=html;
+        $('inmet_count').textContent=data.length;
+        $('inmet_painel').style.display='block';
     }
 
-    function toggleInmetTabela() {
-        const wrap    = el('inmet_tabela_wrap');
-        const btn     = wrap.previousElementSibling.querySelector('button');
-        const visible = wrap.style.display !== 'none';
-        wrap.style.display = visible ? 'none' : 'block';
-        btn.textContent    = visible ? 'Expandir tabela' : 'Recolher tabela';
+    function toggleInmetTabela(){
+        const w=$('inmet_tabela_wrap');
+        const vis=w.style.display!=='none';
+        w.style.display=vis?'none':'block';
+        w.previousElementSibling.querySelector('button').textContent=vis?'Expandir tabela':'Recolher tabela';
+    }
+
+    function inmetOntem(){
+        const fmt=d=>d.toISOString().split('T')[0];
+        const y=new Date(); y.setDate(y.getDate()-1);
+        $('inmet_ini').value=fmt(y); $('inmet_fim').value=fmt(y);
+    }
+    function inmetSemana(){
+        const fmt=d=>d.toISOString().split('T')[0];
+        const t=new Date(); const y=new Date(t); y.setDate(t.getDate()-1); const w=new Date(t); w.setDate(t.getDate()-7);
+        $('inmet_ini').value=fmt(w); $('inmet_fim').value=fmt(y);
+    }
+
+    /* ─────────────────────────────
+       COMPLEX REQUESTS
+    ───────────────────────────── */
+    function reqRegister(){
+        req('POST','/api/auth/register',clean({nome:v('ar_nome'),email:v('ar_email'),senha:v('ar_senha'),telefone:v('ar_tel'),nomePerfil:v('ar_perfil')}),'r_ar',false);
+    }
+    function reqCriarTanque(){
+        req('POST','/api/tanques',clean({idFazenda:lng('t_fid'),codigoTanque:v('t_cod'),tipoAlga:v('t_alga'),capacidadeLitros:dec('t_cap'),phMin:dec('t_phmin'),phMax:dec('t_phmax'),temperaturaMin:dec('t_tmin'),temperaturaMax:dec('t_tmax'),dtInstalacao:v('t_dt')}),'r_t_post');
+    }
+    function reqAtualizarTanque(){
+        req('PUT',`/api/tanques/${v('t_put_id')}`,clean({tipoAlga:v('t_put_alga'),capacidadeLitros:dec('t_put_cap'),phMin:dec('t_put_phmin'),phMax:dec('t_put_phmax'),status:v('t_put_st')}),'r_t_put');
+    }
+    function reqPublicarLote(){
+        req('POST','/api/marketplace/lotes',clean({idFazenda:lng('mk_l_fid'),idTanque:lng('mk_l_tid'),taxonomiaAlga:v('mk_l_taxa'),pesoKg:dec('mk_l_peso'),precoUnitario:dec('mk_l_preco')}),'r_mk_l_post');
+    }
+    function reqTransacao(){
+        req('POST','/api/marketplace/transacoes',clean({idLote:lng('mk_t_lote'),idCredito:lng('mk_t_cred'),tipoTransacao:v('mk_t_tipo'),quantidade:dec('mk_t_qtd'),valorTotal:dec('mk_t_val')}),'r_mk_t_post');
+    }
+
+    /* ─────────────────────────────
+       AUTH SCREEN
+    ───────────────────────────── */
+    function switchTab(t){
+        $('formLogin').style.display = t==='login' ? '':'none';
+        $('formReg').style.display   = t==='register' ? '':'none';
+        document.querySelectorAll('.atab').forEach((b,i)=>
+            b.classList.toggle('active',(i===0&&t==='login')||(i===1&&t==='register')));
+    }
+
+    async function doRegister(){
+        BASE=($('authBase').value||BASE).replace(/\/$/,'');
+        const body=clean({nome:v('rNome'),email:v('rEmail'),senha:v('rSenha'),telefone:v('rTel'),nomePerfil:v('rPerfil')});
+        try{
+            const r=await fetch(`${BASE}/api/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+            const d=await r.json();
+            const m=$('msgReg');
+            if(r.ok){ m.textContent='✓ Conta criada! Agora faça o login.'; m.className='auth-msg ok'; }
+            else { m.textContent=fmtErr(d); m.className='auth-msg err'; }
+        } catch(e){ const m=$('msgReg'); m.textContent='Erro de conexão: '+e.message; m.className='auth-msg err'; }
+    }
+
+    async function doLogin(){
+        BASE=($('authBase').value||BASE).replace(/\/$/,'');
+        try{
+            const r=await fetch(`${BASE}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v('lEmail'),senha:v('lSenha')})});
+            const d=await r.json();
+            const tok=d.token||d.accessToken||d.jwtToken||d.jwt;
+            if(r.ok&&tok){
+                JWT=tok;
+                $('uName').textContent=d.email||d.nome||v('lEmail');
+                $('uRole').textContent=d.perfil||d.role||d.nomePerfil ? `[${d.perfil||d.role||d.nomePerfil}]`:'';
+                $('appBase').value=BASE;
+                $('authScreen').style.display='none';
+                $('app').style.display='flex';
+                updateTok();
+            } else {
+                const m=$('msgLogin'); m.textContent=fmtErr(d)||'Login falhou.'; m.className='auth-msg err';
+            }
+        } catch(e){ const m=$('msgLogin'); m.textContent='Erro de conexão: '+e.message; m.className='auth-msg err'; }
+    }
+
+    async function reqLogin(){
+        BASE=($('appBase')?.value||BASE).replace(/\/$/,'');
+        const t0=performance.now();
+        try{
+            const r=await fetch(`${BASE}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v('al_email'),senha:v('al_senha')})});
+            const d=await r.json();
+            const tok=d.token||d.accessToken||d.jwtToken||d.jwt;
+            if(r.ok&&tok){
+                JWT=tok;
+                $('uName').textContent=d.email||d.nome||v('al_email');
+                $('uRole').textContent=d.perfil||d.role||d.nomePerfil ? `[${d.perfil||d.role||d.nomePerfil}]`:'';
+                updateTok();
+            }
+            showRes('r_al', r.status, JSON.stringify(d,null,2), t0);
+        } catch(e){ showRes('r_al', 0, 'Erro: '+e.message, t0); }
+    }
+
+    function doLogout(){ JWT=''; updateTok(); $('authScreen').style.display='flex'; $('app').style.display='none'; }
+    function updateTok(){ const t=$('tokDisplay'); if(JWT){t.textContent=JWT;t.classList.add('has');}else{t.textContent='Nenhum token — faça login acima.';t.classList.remove('has');} }
+    function fmtErr(d){ if(!d)return'Erro desconhecido'; if(typeof d==='string')return d; if(d.fields)return'Validation → '+Object.entries(d.fields).map(([k,v])=>`${k}: ${v}`).join(' | '); return d.message||d.error||d.erro||JSON.stringify(d); }
+
+    /* ─────────────────────────────
+       NAVIGATION
+    ───────────────────────────── */
+    function goPage(name){
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));
+        $('page-'+name)?.classList.add('active');
+        document.querySelector(`[data-p="${name}"]`)?.classList.add('active');
+    }
+
+    /* ─────────────────────────────
+       RESPONSE RENDERING
+    ───────────────────────────── */
+    function showRes(id, status, text, t0){
+        const ms=Math.round(performance.now()-t0);
+        let cls='s0';
+        if(status>=200&&status<300) cls='s2';
+        else if(status>=400&&status<500) cls='s4';
+        else if(status>=500) cls='s5';
+        const label=status===0?'ERR':String(status);
+        $(id).innerHTML=
+            `<div class="res"><div class="res-head">` +
+            `<span class="st ${cls}">${label}</span>` +
+            `<span class="res-ms">${ms}ms</span>` +
+            `<button class="res-cp" onclick="navigator.clipboard.writeText(this.closest('.res').querySelector('pre').textContent).catch(()=>{})">copiar</button>` +
+            `</div><pre class="res-body">${hlJson(text)}</pre></div>`;
+    }
+
+    function hlJson(json){
+        const s=json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return s.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m=>{
+            let c='jn';
+            if(/^"/.test(m)) c=/:$/.test(m)?'jk':'js';
+            else if(/true|false/.test(m)) c='jb';
+            else if(/null/.test(m)) c='je';
+            return `<span class="${c}">${m}</span>`;
+        });
     }
 </script>
 </body>

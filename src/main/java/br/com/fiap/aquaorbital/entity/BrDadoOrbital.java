@@ -25,10 +25,8 @@ public class BrDadoOrbital {
     @Column(name = "nome_estacao", length = 100)
     private String nomeEstacao;
 
-
     @Column(name = "dt_medicao", nullable = false, length = 10)
     private String dataMedicao;
-
 
     @Column(name = "hr_medicao", length = 4)
     private String horaMedicao;
@@ -60,8 +58,7 @@ public class BrDadoOrbital {
     @Column(name = "radiacao_global", precision = 10, scale = 2)
     private BigDecimal radiacaoGlobal;
 
-
-    @Column(name = "json_original", columnDefinition = "TEXT")
+    @Column(name = "json_original", columnDefinition = "CLOB")
     private String jsonOriginal;
 
     @Column(name = "dt_inclusao", nullable = false, updatable = false)
