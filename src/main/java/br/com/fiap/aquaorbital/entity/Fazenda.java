@@ -39,7 +39,7 @@ public class Fazenda {
     @Column(name = "longitude", precision = 10, scale = 6)
     private BigDecimal longitude;
 
-    // Oracle usa "ATIVA"/"INATIVA"/"MANUTENCAO"
+
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "ATIVA";
