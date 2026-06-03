@@ -36,14 +36,20 @@ public class SecurityConfig {
     }
 
     private static final String[] PUBLIC_URLS = {
-            "/",
-            "/index.html",
-            "/api/auth/**",
-            "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/api-docs/**",
-            "/v3/api-docs/**"
-    };
+        "/",
+        "/index.html",
+        "/api/auth/**",
+        "/api/dados-orbitais/**",
+        "/api/fazendas/**",
+        "/api/marketplace/**",
+        "/api/perfis/**",
+        "/api/tanques/**",
+        "/api/usuarios/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/api-docs/**",
+        "/v3/api-docs/**"
+};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
