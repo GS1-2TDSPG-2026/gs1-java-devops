@@ -105,10 +105,18 @@ public class FazendaService {
         DadoOrbitalResponse ultimoDadoOrbital = dadoOrbitalRepository
                 .findTopByFazendaIdOrderByDtColetaDesc(idFazenda)
                 .map(d -> new DadoOrbitalResponse(
-                        d.getId(), d.getFazenda().getId(), d.getFazenda().getNome(),
-                        d.getFonte(), d.getDtColeta(), d.getIrradianciaParTot(),
-                        d.getNebulosidade(), d.getTemperaturaAmbiente(),
-                        d.getLatitude(), d.getLongitude(), d.getDtRegistro()))
+                        d.getId(),
+                        d.getFazenda().getId(),
+                        d.getFazenda().getNome(),
+                        d.getFonte(),
+                        d.getDtColeta(),
+                        d.getIrradianciaParTot(),
+                        d.getNebulosidade(),
+                        d.getTemperaturaAmbiente(),
+                        d.getLatitude(),
+                        d.getLongitude(),
+                        d.getCriadoEm()
+                ))
                 .orElse(null);
 
         return new DashboardFazendaResponse(
@@ -130,7 +138,7 @@ public class FazendaService {
                 f.getLatitude(),
                 f.getLongitude(),
                 f.getStatus(),
-                f.getDtCadastro(),
+                f.getCriadoEm(),
                 f.getUsuarioResponsavel().getId(),
                 f.getUsuarioResponsavel().getNome()
         );

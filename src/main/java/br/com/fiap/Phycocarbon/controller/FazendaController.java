@@ -37,7 +37,7 @@ public class FazendaController {
             @Valid @RequestBody CriarFazendaRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        // Busca o ID do usuário logado via email
+
         Long usuarioId = ((br.com.fiap.Phycocarbon.entity.Usuario) userDetails).getId();
         FazendaResponse response = fazendaService.criar(request, usuarioId);
         EntityModel<FazendaResponse> model = toModel(response);
