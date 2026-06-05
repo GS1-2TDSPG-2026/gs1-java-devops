@@ -38,7 +38,7 @@ public record BrDadoOrbitalDTOs(
                 e.getDirecaoVento(),
                 e.getPressaoAtm(),
                 e.getRadiacaoGlobal(),
-                e.getDtInclusao()
+                e.getCriadoEm()
         );
     }
 }

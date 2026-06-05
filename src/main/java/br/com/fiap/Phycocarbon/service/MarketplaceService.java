@@ -201,7 +201,7 @@ public class MarketplaceService {
                 t.getLote() != null ? t.getLote().getId() : null,
                 t.getCredito() != null ? t.getCredito().getId() : null,
                 t.getTipoTransacao(), t.getQuantidade(), t.getValorTotal(),
-                t.getStatus(), t.getDtTransacao()
+                t.getStatus(), t.getCriadoEm()
         );
     }
 }

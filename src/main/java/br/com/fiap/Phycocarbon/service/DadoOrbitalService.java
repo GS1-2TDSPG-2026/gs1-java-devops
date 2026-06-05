@@ -191,7 +191,7 @@ public class DadoOrbitalService {
                 d.getTemperaturaAmbiente(),
                 d.getLatitude(),
                 d.getLongitude(),
-                d.getDtRegistro()
+                d.getCriadoEm()
         );
     }
 }

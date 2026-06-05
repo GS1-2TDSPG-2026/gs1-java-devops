@@ -60,7 +60,7 @@ public class AuthService {
     private UsuarioResponse toResponse(Usuario u) {
         return new UsuarioResponse(
                 u.getId(), u.getNome(), u.getEmail(), u.getTelefone(),
-                u.getPerfil().getNomePerfil(), u.getStatus(), u.getDtCriacao()
+                u.getPerfil().getNomePerfil(), u.getStatus(), u.getCriadoEm()
         );
     }
 }

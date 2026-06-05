@@ -57,7 +57,7 @@ public class UsuarioService {
                 u.getEmail(),
                 u.getTelefone(),
                 u.getStatus(),
-                u.getDtCriacao(),
+                u.getCriadoEm(),
                 u.getPerfil().getId(),
                 u.getPerfil().getNomePerfil(),
                 u.getPerfil().getDescricao()
