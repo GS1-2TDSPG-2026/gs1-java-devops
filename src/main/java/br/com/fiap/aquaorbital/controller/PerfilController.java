@@ -8,11 +8,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/perfis")
@@ -25,21 +29,37 @@ public class PerfilController {
 
     @GetMapping
     @Operation(summary = "Listar todos os perfis")
-    public ResponseEntity<List<PerfilDTO>> listar() {
-        return ResponseEntity.ok(perfilService.listarTodos());
+    public ResponseEntity<CollectionModel<EntityModel<PerfilDTO>>> listar() {
+        List<EntityModel<PerfilDTO>> perfis = perfilService.listarTodos().stream()
+                .map(this::toModel)
+                .toList();
+
+        CollectionModel<EntityModel<PerfilDTO>> collection = CollectionModel.of(perfis,
+                linkTo(methodOn(PerfilController.class).listar()).withSelfRel());
+
+        return ResponseEntity.ok(collection);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar perfil por ID")
-    public ResponseEntity<PerfilDTO> buscar(@PathVariable Long id) {
-        return ResponseEntity.ok(perfilService.buscarPorId(id));
+    public ResponseEntity<EntityModel<PerfilDTO>> buscar(@PathVariable Long id) {
+        return ResponseEntity.ok(toModel(perfilService.buscarPorId(id)));
     }
 
     @PostMapping
     @Operation(summary = "Criar novo perfil")
-    public ResponseEntity<PerfilDTO> criar(@Valid @RequestBody CriarPerfilRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(perfilService.criar(request.nomePerfil(), request.descricao()));
+    public ResponseEntity<EntityModel<PerfilDTO>> criar(@Valid @RequestBody CriarPerfilRequest request) {
+        PerfilDTO criado = perfilService.criar(request.nomePerfil(), request.descricao());
+        return ResponseEntity.status(HttpStatus.CREATED).body(toModel(criado));
+    }
+
+    // ---
+
+    private EntityModel<PerfilDTO> toModel(PerfilDTO dto) {
+        return EntityModel.of(dto,
+                linkTo(methodOn(PerfilController.class).buscar(dto.id())).withSelfRel(),
+                linkTo(methodOn(PerfilController.class).listar()).withRel("perfis"),
+                linkTo(methodOn(UsuarioController.class).buscarPorPerfil(dto.id(), null)).withRel("usuarios"));
     }
 
     public record CriarPerfilRequest(

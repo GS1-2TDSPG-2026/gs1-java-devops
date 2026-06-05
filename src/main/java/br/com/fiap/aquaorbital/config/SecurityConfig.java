@@ -35,21 +35,16 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
+    // Apenas login, registro e documentação são públicos.
+    // Todos os demais endpoints exigem token JWT válido.
     private static final String[] PUBLIC_URLS = {
-        "/",
-        "/index.html",
-        "/api/auth/**",
-        "/api/dados-orbitais/**",
-        "/api/fazendas/**",
-        "/api/marketplace/**",
-        "/api/perfis/**",
-        "/api/tanques/**",
-        "/api/usuarios/**",
-        "/swagger-ui/**",
-        "/swagger-ui.html",
-        "/api-docs/**",
-        "/v3/api-docs/**"
-};
+            "/api/auth/login",
+            "/api/auth/register",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/api-docs/**",
+            "/v3/api-docs/**"
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
