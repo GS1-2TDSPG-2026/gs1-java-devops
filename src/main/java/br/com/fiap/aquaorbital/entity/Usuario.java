@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class Usuario implements UserDetails {
+public class Usuario extends AuditEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_usuario")
@@ -39,19 +38,12 @@ public class Usuario implements UserDetails {
     @Column(name = "telefone", length = 20)
     private String telefone;
 
-
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "A";
 
-    @Column(name = "dt_criacao", updatable = false)
-    @Builder.Default
-    private LocalDateTime dtCriacao = LocalDateTime.now();
-
     @OneToMany(mappedBy = "usuarioResponsavel", fetch = FetchType.LAZY)
     private List<Fazenda> fazendas;
-
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

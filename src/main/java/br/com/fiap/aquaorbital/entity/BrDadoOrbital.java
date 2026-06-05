@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "TB_DADO_ORBITAL", schema = "rm562085")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class BrDadoOrbital {
+public class BrDadoOrbital extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_dado_orbital")
@@ -60,13 +59,4 @@ public class BrDadoOrbital {
 
     @Column(name = "json_original", columnDefinition = "CLOB")
     private String jsonOriginal;
-
-    @Column(name = "dt_inclusao", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime dtInclusao = LocalDateTime.now();
-
-    @PrePersist
-    private void prePersist() {
-        if (dtInclusao == null) dtInclusao = LocalDateTime.now();
-    }
 }

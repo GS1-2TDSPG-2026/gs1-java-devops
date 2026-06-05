@@ -12,7 +12,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class Tanque {
+public class Tanque extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_tanque")
@@ -49,6 +49,7 @@ public class Tanque {
     @Builder.Default
     private String status = "ATIVO";
 
+    // Campo de negócio — data de instalação física do tanque
     @Column(name = "dt_instalacao")
     private LocalDate dtInstalacao;
 

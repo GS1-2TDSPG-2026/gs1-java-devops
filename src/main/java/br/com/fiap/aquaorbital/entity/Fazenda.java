@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -12,7 +11,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class Fazenda {
+public class Fazenda extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_fazenda")
@@ -39,14 +38,9 @@ public class Fazenda {
     @Column(name = "longitude", precision = 10, scale = 6)
     private BigDecimal longitude;
 
-
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "ATIVA";
-
-    @Column(name = "dt_cadastro", updatable = false)
-    @Builder.Default
-    private LocalDateTime dtCadastro = LocalDateTime.now();
 
     @OneToMany(mappedBy = "fazenda", fetch = FetchType.LAZY)
     private List<Tanque> tanques;
