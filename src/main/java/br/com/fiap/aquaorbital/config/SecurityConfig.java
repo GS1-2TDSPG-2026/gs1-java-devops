@@ -35,10 +35,11 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
+    // Apenas login, registro e documentação são públicos.
+    // Todos os demais endpoints exigem token JWT válido.
     private static final String[] PUBLIC_URLS = {
-            "/",
-            "/index.html",
-            "/api/auth/**",
+            "/api/auth/login",
+            "/api/auth/register",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api-docs/**",

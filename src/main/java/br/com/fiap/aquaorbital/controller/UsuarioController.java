@@ -10,8 +10,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -21,30 +26,37 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final PagedResourcesAssembler<UsuarioDTO> pagedAssembler;
 
     @GetMapping
     @Operation(summary = "Listar todos os usuários")
-    public ResponseEntity<Page<UsuarioDTO>> listar(Pageable pageable) {
-        return ResponseEntity.ok(usuarioService.listarTodos(pageable));
+    public ResponseEntity<PagedModel<EntityModel<UsuarioDTO>>> listar(Pageable pageable) {
+        Page<UsuarioDTO> page = usuarioService.listarTodos(pageable);
+        PagedModel<EntityModel<UsuarioDTO>> model = pagedAssembler.toModel(page, this::toModel);
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar usuário por ID")
-    public ResponseEntity<UsuarioDTO> buscar(@PathVariable Long id) {
-        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    public ResponseEntity<EntityModel<UsuarioDTO>> buscar(@PathVariable Long id) {
+        return ResponseEntity.ok(toModel(usuarioService.buscarPorId(id)));
     }
 
     @GetMapping("/perfil/{idPerfil}")
     @Operation(summary = "Listar usuários por perfil")
-    public ResponseEntity<Page<UsuarioDTO>> buscarPorPerfil(@PathVariable Long idPerfil, Pageable pageable) {
-        return ResponseEntity.ok(usuarioService.buscarPorPerfil(idPerfil, pageable));
+    public ResponseEntity<PagedModel<EntityModel<UsuarioDTO>>> buscarPorPerfil(
+            @PathVariable Long idPerfil, Pageable pageable) {
+        Page<UsuarioDTO> page = usuarioService.buscarPorPerfil(idPerfil, pageable);
+        PagedModel<EntityModel<UsuarioDTO>> model = pagedAssembler.toModel(page, this::toModel);
+        return ResponseEntity.ok(model);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar usuário")
-    public ResponseEntity<UsuarioDTO> atualizar(@PathVariable Long id,
-                                                @Valid @RequestBody AtualizarUsuarioRequest request) {
-        return ResponseEntity.ok(usuarioService.atualizar(id, request));
+    public ResponseEntity<EntityModel<UsuarioDTO>> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody AtualizarUsuarioRequest request) {
+        return ResponseEntity.ok(toModel(usuarioService.atualizar(id, request)));
     }
 
     @DeleteMapping("/{id}")
@@ -52,5 +64,14 @@ public class UsuarioController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         usuarioService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ---
+
+    private EntityModel<UsuarioDTO> toModel(UsuarioDTO dto) {
+        return EntityModel.of(dto,
+                linkTo(methodOn(UsuarioController.class).buscar(dto.idUsuario())).withSelfRel(),
+                linkTo(methodOn(UsuarioController.class).listar(null)).withRel("usuarios"),
+                linkTo(methodOn(PerfilController.class).buscar(dto.idPerfil())).withRel("perfil"));
     }
 }
