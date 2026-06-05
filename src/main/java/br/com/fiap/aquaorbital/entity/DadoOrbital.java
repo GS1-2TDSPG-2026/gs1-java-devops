@@ -2,14 +2,16 @@ package br.com.fiap.aquaorbital.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "TB_DADO_ORBITAL", schema = "rm562085")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class DadoOrbital {
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
+public class DadoOrbital extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_dado_orbital")
@@ -41,8 +43,4 @@ public class DadoOrbital {
 
     @Column(name = "longitude", precision = 10, scale = 6)
     private BigDecimal longitude;
-
-    @Column(name = "dt_registro", updatable = false)
-    @Builder.Default
-    private LocalDateTime dtRegistro = LocalDateTime.now();
 }

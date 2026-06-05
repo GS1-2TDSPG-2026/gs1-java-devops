@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "TB_TRANSACAO_MARKETPLACE", schema = "rm562085")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class TransacaoMarketplace {
+public class TransacaoMarketplace extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_transacao_marketplace")
@@ -43,8 +42,4 @@ public class TransacaoMarketplace {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "PENDENTE";
-
-    @Column(name = "dt_transacao", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime dtTransacao = LocalDateTime.now();
 }
