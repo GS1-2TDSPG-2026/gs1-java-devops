@@ -9,7 +9,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>br.com.fiap</groupId>
-	<artifactId>aquaorbital</artifactId>
+	<artifactId>Phycocarbon</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
