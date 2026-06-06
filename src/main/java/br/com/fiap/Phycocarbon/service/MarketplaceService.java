@@ -130,7 +130,7 @@ public class MarketplaceService {
                 throw new IllegalArgumentException("Crédito não está disponível para compra");
             credito.setStatus("VENDIDO");
             creditoRepository.save(credito);
-        } else if (!"VENDA_BIOMASSA".equals(request.tipoTransacao())) {
+        } else {
             throw new IllegalArgumentException("Tipo de transação inválido: " + request.tipoTransacao());
         }
 

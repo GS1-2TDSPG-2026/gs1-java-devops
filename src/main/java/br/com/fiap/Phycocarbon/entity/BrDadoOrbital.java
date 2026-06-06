@@ -6,16 +6,22 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "TB_DADO_ORBITAL", schema = "rm562085")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Table(name = "TB_DADO_ORBITAL_BR", schema = "rm562085")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class BrDadoOrbital extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_dado_orbital")
-    @SequenceGenerator(name = "sq_dado_orbital", sequenceName = "rm562085.SQ_DADO_ORBITAL", allocationSize = 1)
-    @Column(name = "id_dado_orbital")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_dado_orbital_br")
+    @SequenceGenerator(
+            name = "sq_dado_orbital_br",
+            sequenceName = "rm562085.SQ_DADO_ORBITAL_BR",
+            allocationSize = 1
+    )
+    @Column(name = "id_dado_orbital_br")
     private Long id;
 
     @Column(name = "cod_estacao", nullable = false, length = 10)

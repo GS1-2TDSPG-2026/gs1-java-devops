@@ -24,7 +24,7 @@ public class Tanque extends AuditEntity {
     @JoinColumn(name = "id_fazenda", nullable = false)
     private Fazenda fazenda;
 
-    @Column(name = "codigo_tanque", nullable = false, unique = true, length = 30)
+    @Column(name = "codigo_tanque", nullable = false, length = 30)
     private String codigoTanque;
 
     @Column(name = "tipo_alga", nullable = false, length = 50)
