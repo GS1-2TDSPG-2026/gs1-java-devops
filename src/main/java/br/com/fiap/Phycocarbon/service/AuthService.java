@@ -34,7 +34,14 @@ public class AuthService {
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
 
         String token = jwtService.gerarToken(usuario);
-        return new TokenResponse(token, "Bearer", usuario.getEmail(), usuario.getPerfil().getNomePerfil());
+        return new TokenResponse(
+                token,
+                "Bearer",
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getPerfil().getNomePerfil()
+        );
     }
 
     public UsuarioResponse register(RegisterRequest request) {

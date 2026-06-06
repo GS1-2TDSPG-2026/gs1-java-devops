@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class ResponseDTOs {
 
-    public record TokenResponse(String token, String tipo, String email, String perfil) {}
+    public record TokenResponse(String token, String tipo, Long id, String nome, String email, String perfil) {}
 
     public record UsuarioResponse(Long id, String nome, String email, String telefone,
                                   String perfil, String status, LocalDateTime dtCriacao) {}
