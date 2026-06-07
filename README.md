@@ -16,17 +16,15 @@ Plataforma IoT + IA para otimização do cultivo de microalgas com integração 
 
 ---
 
-## Equipe
+## Integrantes do Grupo
 
-| Nome | RM |
-|---|---|
-| Pedro Brum | RM561780 |
-| Arthur Brito | RM562085 |
-| Luiz Felipe Flosi | RM563197 |
-| Kelson Zhang | RM563748 |
-| Alexander Dennis Isidro | RM565554 |
-
-
+| Nome | RM | Turma |
+|---|---|---|
+| *Alexander Dennis Isidro* | *RM565554* | 2TDSPG |
+| *Arthur Brito da Silva* | *RM562085* | 2TDSPG |
+| *Kelson Zhang* | *RM563748* | 2TDSPG |
+| *Luiz Felipe Flosi* | *RM563197* | 2TDSPG |
+| *Pedro Henrique Brum Lopes* | *RM561780* | 2TDSPG |
 
 ---
 
