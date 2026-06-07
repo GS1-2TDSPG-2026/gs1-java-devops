@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -61,6 +62,16 @@ public class FazendaController {
     @Operation(summary = "Dashboard da fazenda — status, tanques, previsões e créditos")
     public ResponseEntity<DashboardFazendaResponse> dashboard(@PathVariable Long id) {
         return ResponseEntity.ok(fazendaService.getDashboard(id));
+    }
+
+    @GetMapping("/minhas")
+    @Operation(summary = "Listar fazendas vinculadas ao usuário autenticado")
+    public ResponseEntity<List<FazendaResponse>> listarMinhas(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long usuarioId = ((br.com.fiap.Phycocarbon.entity.Usuario) userDetails).getId();
+
+        return ResponseEntity.ok(fazendaService.listarPorUsuario(usuarioId));
     }
 
     @PutMapping("/{id}")
