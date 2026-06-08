@@ -21,6 +21,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		<!-- Driver PostgreSQL — usado apenas no profile docker -->
+		<dependency>
+    			<groupId>org.postgresql</groupId>
+    			<artifactId>postgresql</artifactId>
+    			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-hateoas</artifactId>

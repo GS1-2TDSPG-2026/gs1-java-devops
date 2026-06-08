@@ -42,4 +42,10 @@ public class TransacaoMarketplace extends AuditEntity {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "PENDENTE";
+
+}
+
+    @Column(name = "dt_transacao", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime dtTransacao = LocalDateTime.now();
 }
