@@ -1,9 +1,8 @@
 package br.com.fiap.Phycocarbon.entity;
-
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "TB_TRANSACAO_MARKETPLACE", schema = "rm562085")
@@ -42,8 +41,6 @@ public class TransacaoMarketplace extends AuditEntity {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "PENDENTE";
-
-}
 
     @Column(name = "dt_transacao", nullable = false, updatable = false)
     @Builder.Default
