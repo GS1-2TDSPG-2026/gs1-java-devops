@@ -181,29 +181,29 @@ SELECT * FROM rm562085.tb_fazenda;
 Acesse o Swagger UI:
 
 ```
-http://localhost:8080/swagger-ui.html
+http://57.156.65.216:8080/swagger-ui.html
 ```
 
 Fluxo de teste completo:
 
 ```bash
 # 1) Criar perfil
-curl -X POST http://localhost:8080/api/perfis \
+curl -X POST http://57.156.65.216:8080/api/perfis \
   -H "Content-Type: application/json" \
   -d '{"nomePerfil":"ADMIN","descricao":"Administrador"}'
 
 # 2) Registrar usuário
-curl -X POST http://localhost:8080/api/auth/register \
+curl -X POST http://57.156.65.216:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"nome":"Teste","email":"teste@fiap.com","senha":"senha123","nomePerfil":"ADMIN"}'
 
 # 3) Login — guardar o token retornado
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://57.156.65.216:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"teste@fiap.com","senha":"senha123"}'
 
 # 4) Criar fazenda (substituir <TOKEN> pelo JWT recebido)
-curl -X POST http://localhost:8080/api/fazendas \
+curl -X POST http://57.156.65.216:8080/api/fazendas \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{"nome":"Fazenda Teste","cidade":"São Paulo","uf":"SP","latitude":-23.5505,"longitude":-46.6333}'
