@@ -16,7 +16,6 @@ RUN mvn clean package -DskipTests -q
 FROM eclipse-temurin:17-jre-alpine
 
 # Variáveis de ambiente padrão
-ENV SPRING_PROFILES_ACTIVE=docker
 ENV APP_PORT=8080
 
 WORKDIR /app/phycocarbon
