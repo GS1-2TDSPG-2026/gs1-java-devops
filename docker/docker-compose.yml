@@ -47,7 +47,7 @@ services:
       INMET_JANELA_DIAS: "1"
       INMET_CRON: "0 0 1 * * *"
     ports:
-      - "5433:5433"
+      - "8080:8080"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api-docs > /dev/null 2>&1 || exit 1"]
       interval: 30s
