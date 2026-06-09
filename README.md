@@ -32,39 +32,7 @@ Plataforma **IoT + IA** para otimização do cultivo de microalgas com integraç
 
 ## 🏗️ Arquitetura Macro
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     AZURE VIRTUAL MACHINE                        │
-│                   Ubuntu 22.04 LTS — B2s                         │
-│                   IP Público Estático                            │
-│                                                                   │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │                   Docker Engine                           │   │
-│  │                   Rede: phyconet (bridge)                 │   │
-│  │                                                           │   │
-│  │  ┌─────────────────────┐    ┌──────────────────────────┐ │   │
-│  │  │   rm563197-app      │    │      rm563197-db          │ │   │
-│  │  │  Spring Boot 3.4.5  │───►│    PostgreSQL 16          │ │   │
-│  │  │  Java 17 (JRE)      │    │    porta: 5432            │ │   │
-│  │  │  porta: 8080        │    │    volume: rm563197-pgdata │ │   │
-│  │  │  user: phycouser    │    │                           │ │   │
-│  │  │  /app/phycocarbon   │    │    Schema: rm562085       │ │   │
-│  │  └─────────────────────┘    └──────────────────────────┘ │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                                                                   │
-│  NSG: porta 8080 aberta ao público                               │
-│       porta 22 aberta para SSH                                   │
-└─────────────────────────────────────────────────────────────────┘
-         ▲
-         │  HTTP :8080
-         │
-┌────────┴──────────┐        ┌──────────────────────────┐
-│  Usuário / Mobile │        │   APIs Externas           │
-│  Swagger UI       │        │   NASA POWER              │
-└───────────────────┘        │   Open-Meteo              │
-                             │   INMET                   │
-                             └──────────────────────────┘
-```
+![Estrutura Macro da VM Azure](docs/phycocarbon-arch.drawio.png)
 
 **Fluxo de dados:**
 1. Usuário autentica via `POST /api/auth/login` → recebe JWT
