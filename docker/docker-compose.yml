@@ -2,59 +2,20 @@ version: "3.9"
 
 services:
 
-  # ── Container do Banco de Dados ───────────────────────────
-  rm563197-db:
-    image: postgres:16-alpine
-    container_name: rm563197-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: phycocarbon
-      POSTGRES_USER: phycouser
-      POSTGRES_PASSWORD: phyco@2026
-    ports:
-      - "5432:5432"
-    volumes:
-      - rm563197-pgdata:/var/lib/postgresql/data
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    networks:
-      - phyconet
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U phycouser -d phycocarbon"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-  # ── Container da Aplicação ────────────────────────────────
   rm563197-app:
     build:
       context: ..
       dockerfile: docker/Dockerfile
     container_name: rm563197-app
     restart: unless-stopped
-    depends_on:
-      rm563197-db:
-        condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://rm563197-db:5432/phycocarbon
-      SPRING_DATASOURCE_USERNAME: phycouser
-      SPRING_DATASOURCE_PASSWORD: phyco@2026
-      AQUAORBITAL_JWT_SECRET: aquaorbital-secret-key-fiap-global-solution-2026-very-long-key
-      AQUAORBITAL_JWT_EXPIRATION: "86400000"
+      SPRING_PROFILES_ACTIVE: azure
       APP_PORT: "8080"
     ports:
       - "8080:8080"
-    networks:
-      - phyconet
-
-# ── Volumes ──────────────────────────────────────────────────
-volumes:
-  rm563197-pgdata:
-    name: rm563197-pgdata
-
-# ── Rede ─────────────────────────────────────────────────────
-networks:
-  phyconet:
-    name: phyconet
-    driver: bridge
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api-docs > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
