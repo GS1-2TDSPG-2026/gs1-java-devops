@@ -25,8 +25,8 @@ Plataforma **IoT + IA** para otimização do cultivo de microalgas com integraç
 | API (Azure) | `http://<IP_PUBLICO_AZURE>:8080` |
 | Swagger UI | `http://<IP_PUBLICO_AZURE>:8080/swagger-ui.html` |
 | OpenAPI JSON | `http://<IP_PUBLICO_AZURE>:8080/api-docs` |
-| Vídeo Demo | *(em breve)* |
-| Pitch (3 min) | *(em breve)* |
+| Vídeo Demo | https://www.youtube.com/watch?v=N2hsgf3Jvpw |
+| Pitch (3 min) | https://www.youtube.com/watch?v=E6RTz_CEIDc |
 
 ---
 
@@ -127,7 +127,7 @@ TB_PERFIL (1) ──────── (N) TB_USUARIO (1) ──── (N) TB_FA
 #### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/<seu-usuario>/gs1-java-devops.git
+git clone https://github.com/GS1-2TDSPG-2026/gs1-java-devops.git
 cd gs1-java-devops
 ```
 
@@ -317,7 +317,7 @@ ssh azureuser@<IP_PUBLICO>
 
 ```bash
 # Dentro da VM — executar o script de provisionamento
-curl -fsSL https://raw.githubusercontent.com/<seu-usuario>/gs1-java-devops/main/provision.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/GS1-2TDSPG-2026/gs1-java-devops/main/provision.sh | sudo bash
 
 # Aplicar grupo docker sem fazer logout
 newgrp docker
@@ -348,7 +348,7 @@ newgrp docker
 #### Passo 5 — Clonar o repositório na VM
 
 ```bash
-git clone https://github.com/<seu-usuario>/gs1-java-devops.git
+git clone https://github.com/GS1-2TDSPG-2026/gs1-java-devops.git
 cd gs1-java-devops
 ```
 
