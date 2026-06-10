@@ -30,8 +30,8 @@ Plataforma **IoT + IA** para otimização do cultivo de microalgas com integraç
 | Recurso | URL |
 |---|---|
 | 🚀 API em produção (Azure) | http://57.156.65.216:8080 |
-| 📖 Swagger UI | http://57.156.65.216:8080/swagger-ui.html |
-| 📄 OpenAPI JSON | http://57.156.65.216:8080/api-docs |
+| 📖 Swagger UI | https://gs1-java-devops.onrender.com/swagger-ui/index.html |
+| 📄 OpenAPI JSON | https://gs1-java-devops.onrender.com/api-docs |
 | 🎥 Vídeo Demo (até 10 min) | https://youtu.be/8bm3bk12Tg4 |
 | 🎯 Pitch (3 min) | https://www.youtube.com/watch?v=E6RTz_CEIDc |
 
